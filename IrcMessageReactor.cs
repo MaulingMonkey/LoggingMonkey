@@ -1,0 +1,69 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
+
+namespace LoggingMonkey {
+	class IrcMessageReactor : List<IIrcMessageReactor> , IIrcMessageReactor {
+		public bool TryReact( Network network, string message ) {
+			return this.Any( siml => siml.TryReact(network,message) );
+		}
+
+		public void Add( string regex, string response ) {
+			Add( new IrcMessageLoggerReactor(regex,response) );
+		}
+
+		public void Add( string regex, Action<Network,Match> match ) {
+			Add( new IrcMessageRegexReactor(regex,match) );
+		}
+
+		static readonly Random RNG = new Random();
+
+		static readonly Regex reTag = new Regex(@"<.+?>",RegexOptions.Compiled);
+		static readonly Dictionary<string,DateTime> SpamLimiterList = new Dictionary<string,DateTime>();
+
+		public static readonly IrcMessageReactor Default = new IrcMessageReactor()
+			{ { @"^\:(?<who>[^ ]+) PRIVMSG (?<channels>[^ ]+) \:?\001ACTION (?<message>.+)\001$" , "[{when}] *{who} {message}*" }
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!last (?<few>\d+)$", (network,m) => {
+				var channel = m.Groups["channel"].Value;
+				if ( network.Channels.Contains(channel) ) {
+					var logs = network.Logs.Channel(channel);
+					try {
+						var who = m.Groups["who"].Value;
+						var nick = who.Substring(0,who.IndexOf('!'));
+						var host = who.Substring(who.IndexOf('@')+1);
+						var few = Math.Min(10,int.Parse(m.Groups["few"].Value));
+						if (!SpamLimiterList.ContainsKey(host)) SpamLimiterList.Add(host,DateTime.Now.AddMinutes(-2));
+						var now = DateTime.Now;
+
+						if ( (now-SpamLimiterList[host]).TotalMinutes < 1 ) {
+							network.Send( "PRIVMSG "+nick+ " :Stop spamming me ;_;" );
+						} else {
+							for ( int i = Math.Max(logs.Count-few,0) ; i < logs.Count ; ++i ) network.Send( "PRIVMSG "+nick+ " :"+HttpUtility.HtmlDecode(reTag.Replace(logs[i].CompleteHtml,"")) );
+						}
+
+						SpamLimiterList[host]=now;
+					} catch ( Exception ) {}
+					logs.Log(m,"[{when}] <{who}> !last {few}");
+				}
+			}}
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channels>[^ ]+) \:?(?<message>.+)$"                , "[{when}] <{who}> {message}" }
+			, { @"^\:(?<who>[^ ]+) JOIN (?<channels>[^ ]+)$"                                     , "[{when}] -->| {who} has joined {channel}" }
+			, { @"^\:(?<who>[^ ]+) PART (?<channels>[^ ]+) ?\:?(?<message>.*)$"                  , "[{when}] |<-- {who} has left {channel} ({message})" }
+			, { @"^\:(?<who>[^ ]+) KICK (?<channel>[^ ]+) (?<target>[^ ]+) ?\:?(?<message>.*)$"  , "[{when}] !<-- {target} was kicked from {channel} by {who} ({message})"  }
+			//, { @"^\:(?<who>[^ ]+) QUIT \:?(?<message>.*)$"                                      , "[{when}] |<-- {who} has quit {network} ({message})" }
+			, { @"^\:(?<who>[^ ]+) MODE (?<channel>[^ ]+) (?<modes>.+)$"                         , "[{when}] +--+ {who} has set mode(s) {modes} in {channel}" }
+			, { @"^\:(?<who>[^ ]+) TOPIC (?<channel>[^ ]+) ?\:?(?<topic>.*)$"                    , "[{when}] +--+ {who} has set {channel}'s topic to {topic}" }
+			, { @"^\:(?<who>[^ ]+) NICK [:]?(?<newnick>[^ ]+)$"                                  , "[{when}] +--+ {who} has changed their nick to {newnick}" }
+
+			, { @"PING(?<data> [^ ]*)?$"                              , (network,match) => network.Send( "PONG" + match.Groups["data"].Value ) }
+			, { @"^\:(?<who>[^ ]+) (?<code>\d\d\d) \:?(?<message>.*)$", (network,match) => {
+				switch ( match.Groups["code"].Value ) {
+				case "001": foreach ( var channel in network.Channels ) network.Send("JOIN "+channel); break;
+				case "433": network.Send( "NICK LoggingMonkey"+RNG.Next(9999).ToString() ); break;
+				}
+			}}
+			};
+	}
+}
