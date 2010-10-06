@@ -39,8 +39,9 @@ namespace LoggingMonkey {
 
 		public void Send( string message ) {
 			lock ( StreamWriter ) {
-				StreamWriter.Write(message+"\r\n");
-				StreamWriter.Flush();
+				var buffer = Encoding.UTF8.GetBytes(message+"\r\n");
+				int i=0;
+				while ( i<buffer.Length ) i += Client.Client.Send(buffer,i,buffer.Length,SocketFlags.None);
 			}
 		}
 
