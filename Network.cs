@@ -88,10 +88,9 @@ namespace LoggingMonkey {
 
 			Client = new TcpClient(Hostname,Port);
 			NetworkStream = new NetworkStream(Client.Client);
-			StreamReader = new StreamReader(NetworkStream, Encoding.UTF8);
-			StreamWriter = new StreamWriter(NetworkStream, Encoding.UTF8);
+			StreamReader = new StreamReader(NetworkStream);
+			StreamWriter = new StreamWriter(NetworkStream);
 
-			if ( Password != null ) Send( "PASS "+Password );
 			Send( "USER monkey * * *" );
 			Send( "NICK LoggingMonkey" );
 			if ( Password != null ) Send( "PASS "+Password );
