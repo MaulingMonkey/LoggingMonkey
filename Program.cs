@@ -30,7 +30,7 @@ namespace LoggingMonkey {
 		}
 
 		public static string HtmlizeUrls( string text ) {
-			return reUrlPatterns.Replace( text, m => { var url=GuessAndPrependProtocol(m.Value); return "<a rel=\"nofollow\" href=\""+url+"\">"+m.Value+"</a>"; } );
+			return reUrlPatterns.Replace( text, m => { var url=GuessAndPrependProtocol(m.Value); return "<a rel=\"nofollow\" class=\"link\" target=\"_blank\" href=\""+url+"\">"+m.Value+"</a>"; } );
 		}
 
 		static void Main() {

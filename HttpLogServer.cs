@@ -86,9 +86,12 @@ namespace LoggingMonkey {
 					writer.WriteLine("<html><head>");
 					writer.WriteLine("\t<title>{0} -- {1} ({2} - {3})</title>", network, channel, from, to );
 					writer.WriteLine("\t<meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\">");
+					writer.WriteLine("\t<script type=\"text/javascript\" src=\"http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js\"></script>");
 					writer.WriteLine("\t<style type=\"text/css\">");
 					writer.WriteLine("\t	table, tr, td { cell-spacing: 0; padding: 0; margin: 0; border-collapse: collapse; vertical-align: top; }");
 					writer.WriteLine("\t	a { color: blue; }");
+					writer.WriteLine("\t	.link { color: red; }");
+					writer.WriteLine("\t	.tooltip { display: none; background: black; color: white; padding: 5px; }");
 					writer.WriteLine("\t</style>");
 					writer.WriteLine("</head><body>");
 					writer.WriteLine("	<div style=\"7pt; float: right; text-align: right\">");
@@ -176,6 +179,7 @@ namespace LoggingMonkey {
 						writer.WriteLine( "Search returned {1} lines and took {0} seconds", (stop2-start2).TotalSeconds.ToString("N2"), linesMatched );
 					}
 
+					writer.WriteLine("	<script type='text/javascript'> $(document).ready(function() { $('a[title]').tooltip(); });</script>");
 					writer.WriteLine("</body></html>");
 				}
 			} catch ( Exception ) {
