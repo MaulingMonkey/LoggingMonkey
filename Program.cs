@@ -13,8 +13,25 @@ namespace LoggingMonkey {
 		public static readonly Regex reWhen = new Regex("^"+fWhen, RegexOptions.Compiled);
 		public static readonly Regex reLogFilename = new Regex(@".*\\(?<network>[^-\\]+)-(?<channel>#[^-\\]+)-(?<year>\d+)-(?<month>\d+)-(?<day>\d+)\.log",RegexOptions.Compiled);
 		public static readonly Regex reWho = new Regex(@"(?<nick>[^*;! ]+)!(?<user>[^@ ]+)@(?<host>[^&> ]+)", RegexOptions.Compiled);
+		public static readonly Regex reUrlProtocol = new Regex("^"+fUrlProtocol,RegexOptions.Compiled);
+		public static readonly Regex reUrlPatterns = new Regex(@"\b(?:" + fUrlProtocol + "|"  + fUrlTLD + "|"  + fUrlBLD + ")", RegexOptions.Compiled);
 
+		const string fUrlContinue = "(?:[^.,;:!?')\"\\s]|(\\S(?=\\S|$)))";
+		const string fUrlProtocol = @"([-.+a-zA-Z0-9]+?:\/\/"+fUrlContinue+"+)";
+		const string fUrlTLD      = @"([^\s]+?\.(?:com|net|org|edu|gov|mil|info|biz)"+fUrlContinue+"*)";
+		const string fUrlBLD      = @"((?:www|ftp)\."+fUrlContinue+"+)";
 
+		static string GuessAndPrependProtocol( string url ) {
+			Match m = reUrlProtocol.Match(url);
+			if ( m.Success ) return url;
+			else if ( url.StartsWith("www.") ) return "http://"+url;
+			else if ( url.StartsWith("ftp.") ) return "ftp://"+url;
+			else return "http://"+url;
+		}
+
+		public static string HtmlizeUrls( string text ) {
+			return reUrlPatterns.Replace( text, m => { var url=GuessAndPrependProtocol(m.Value); return "<a rel=\"nofollow\" href=\""+url+"\">"+url+"</a>"; } );
+		}
 
 		static void Main() {
 			bool cancel = false;
@@ -118,18 +135,12 @@ namespace LoggingMonkey {
 						nick = nih = string.Empty;
 					}
 
-					//var html = reWhen.Replace( reWho.Replace( HttpUtility.HtmlEncode(line), m => String.Format
-					//    ( "<a title='{0}'><font color='#0000FF'>{1}</font></a>"
-					//    , m.Value
-					//    , m.Groups["nick"].Value
-					//    )), m => "["+dt.ToString("g")+"]" ) + "<br>";
-					//filelogs[i].Add( new ChannelLogs.Entry() { When=dt, FormattedHTML=html } );
 					filelogs[i].Add( new ChannelLogs.Entry()
 						{ When = dt
 						, NicknameHtml = string.Intern(nick)
 						, NihHtml      = string.Intern(nih)
 						, PreambleHtml = string.Intern(line.Substring(0,mWho.Index))
-						, MessageHtml  = line.Substring(mWho.Index+mWho.Length)
+						, MessageHtml  = HtmlizeUrls( line.Substring(mWho.Index+mWho.Length) )
 						});
 				}
 			});

@@ -111,18 +111,7 @@ namespace LoggingMonkey {
 				, NicknameHtml = string.Intern(nick)
 				, NihHtml      = string.Intern(nih)
 				, PreambleHtml = string.Intern(line.Substring(0,mWho.Index))
-				, MessageHtml  = line.Substring(mWho.Index+mWho.Length)
-				//, FormattedHTML = Program.reWhen.Replace
-				//    ( Program.reWho.Replace
-				//        ( HttpUtility.HtmlEncode(line)
-				//        , m => String.Format
-				//            ( "<a title='{0}'><font color='#0000FF'>{1}</font></a>"
-				//            , m.Value
-				//            , m.Groups["nick"].Value
-				//            )
-				//        )
-				//    , m => "["+when.ToString("g")+"]"
-				//    ) + "<br>"
+				, MessageHtml  = Program.HtmlizeUrls( line.Substring(mWho.Index+mWho.Length) )
 				});
 		}
 	}
