@@ -30,7 +30,7 @@ namespace LoggingMonkey {
 		}
 
 		public static string HtmlizeUrls( string text ) {
-			return reUrlPatterns.Replace( text, m => { var url=GuessAndPrependProtocol(m.Value); return "<a rel=\"nofollow\" href=\""+url+"\">"+url+"</a>"; } );
+			return reUrlPatterns.Replace( text, m => { var url=GuessAndPrependProtocol(m.Value); return "<a rel=\"nofollow\" href=\""+url+"\">"+m.Value+"</a>"; } );
 		}
 
 		static void Main() {
@@ -135,12 +135,15 @@ namespace LoggingMonkey {
 						nick = nih = string.Empty;
 					}
 
+					var preamble = string.Intern(line.Substring(0,mWho.Index));
+					var message  = line.Substring(mWho.Index+mWho.Length);
+
 					filelogs[i].Add( new ChannelLogs.Entry()
 						{ When = dt
 						, NicknameHtml = string.Intern(nick)
 						, NihHtml      = string.Intern(nih)
-						, PreambleHtml = string.Intern(line.Substring(0,mWho.Index))
-						, MessageHtml  = HtmlizeUrls( line.Substring(mWho.Index+mWho.Length) )
+						, PreambleHtml = preamble
+						, MessageHtml  = (preamble == " *" || preamble == " &lt;") ? Program.HtmlizeUrls(message) : message
 						});
 				}
 			});

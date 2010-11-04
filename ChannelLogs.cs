@@ -106,12 +106,14 @@ namespace LoggingMonkey {
 				nick = nih = string.Empty;
 			}
 
+			var preamble = string.Intern(line.Substring(0,mWho.Index));
+			var message  = line.Substring(mWho.Index+mWho.Length);
 			lock (this) Add( new Entry()
 				{ When = when
 				, NicknameHtml = string.Intern(nick)
 				, NihHtml      = string.Intern(nih)
-				, PreambleHtml = string.Intern(line.Substring(0,mWho.Index))
-				, MessageHtml  = Program.HtmlizeUrls( line.Substring(mWho.Index+mWho.Length) )
+				, PreambleHtml = preamble
+				, MessageHtml  = (preamble == " *" || preamble == " &lt;") ? Program.HtmlizeUrls(message) : message
 				});
 		}
 	}
