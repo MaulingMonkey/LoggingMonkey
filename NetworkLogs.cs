@@ -23,10 +23,14 @@ namespace LoggingMonkey {
 		}
 
 		public bool HasChannel( string channel ) {
+			channel = channel.ToLowerInvariant();
+
 			return _Channels.ContainsKey(channel);
 		}
 
 		public ChannelLogs Channel( string channel ) {
+			channel = channel.ToLowerInvariant();
+
 			if (!_Channels.ContainsKey(channel)) _Channels.Add
 				( channel
 				, new ChannelLogs
