@@ -83,7 +83,8 @@ namespace LogsWebServer {
 
 		public enum LineType {
 			Message, Action,
-			Join, Part, Quit, Kick
+			Join, Part, Quit, Kick,
+			Meta,
 		}
 
 		public struct Line {
@@ -152,78 +153,90 @@ namespace LogsWebServer {
 			return files;
 		}
 
-		public static IEnumerable<Line> ReadAllLines( string network, string channel ) {
+		public static IEnumerable<Line> ReadAllLines( string network, string channel, DateTime start, DateTime end ) {
 			FileEntry[] files = GetFiles(network,channel);
 
-			foreach ( var file in files )
-			using ( var reader = new StreamReader(File.Open(file.Name,FileMode.Open,FileAccess.Read,FileShare.ReadWrite)) )
-			for ( string rawline ; (rawline=reader.ReadLine()) != null ; )
-			{
-				FastLineReader line = rawline;
+			foreach ( var file in files ) {
+				if ( file.Date.AddDays(1) < start ) continue;
+				if ( file.Date > end ) continue;
 
-				int H=0,M=0,S=0;
+				using ( var reader = new StreamReader(File.Open(file.Name,FileMode.Open,FileAccess.Read,FileShare.ReadWrite)) )
+				for ( string rawline ; (rawline=reader.ReadLine()) != null ; )
+				{
+					FastLineReader line = rawline;
 
-				if (!line.Eat('[')) continue;
-				while ( '0'<=line.Character && line.Character<='9' ) H=H*10+(line.EatAny()-'0');
-				if (!line.Eat(':')) continue;
-				while ( '0'<=line.Character && line.Character<='9' ) M=M*10+(line.EatAny()-'0');
-				if (line.Eat(':')) while ( '0'<=line.Character && line.Character<='9' ) S=S*10+(line.EatAny()-'0');
-				line.Eat(' ');
+					int H=0,M=0,S=0;
 
-				bool am = line.Character=='a' || line.Character=='A';
-				bool pm = line.Character=='p' || line.Character=='P';
-				if (!am&&!pm) continue;
-				line.EatAny();
-				if (!(line.Eat('m') || line.Eat('M'))) continue;
-				if (!(line.Eat(']') && line.Eat(' '))) continue;
+					if (!line.Eat('[')) continue;
+					while ( '0'<=line.Character && line.Character<='9' ) H=H*10+(line.EatAny()-'0');
+					if (!line.Eat(':')) continue;
+					while ( '0'<=line.Character && line.Character<='9' ) M=M*10+(line.EatAny()-'0');
+					if (line.Eat(':')) while ( '0'<=line.Character && line.Character<='9' ) S=S*10+(line.EatAny()-'0');
+					line.Eat(' ');
 
-				var toyield = new Line()
-					{ When = new DateTime( file.Year, file.Month, file.Day, H, M, S )
+					bool am = line.Character=='a' || line.Character=='A';
+					bool pm = line.Character=='p' || line.Character=='P';
+					if (!am&&!pm) continue;
+					line.EatAny();
+					if (!(line.Eat('m') || line.Eat('M'))) continue;
+					if (!(line.Eat(']') && line.Eat(' '))) continue;
+
+					var toyield = new Line()
+						{ When = new DateTime( file.Year, file.Month, file.Day, H, M, S )
+						};
+
+					Action<char> EatNuhUntil = chr => {
+						toyield.Nick    = line.EatUntilDiscard('!');
+						toyield.User    = line.EatUntilDiscard('@');
+						toyield.Host    = line.EatUntilDiscard(chr);
 					};
 
-				Action<char> EatNuhUntil = chr => {
-					toyield.Nick    = line.EatUntilDiscard('!');
-					toyield.User    = line.EatUntilDiscard('@');
-					toyield.Host    = line.EatUntilDiscard(chr);
-				};
+					switch ( line.Character ) {
+					case '<': // message
+						line.Eat('<');
+						toyield.Type    = LineType.Message;
+						EatNuhUntil('>');
+						if (!line.Eat(' ')) continue;
+						toyield.Message = line.EatRemainder();
+						break;
+					case '*': // action
+						line.Eat('*');
+						toyield.Type    = LineType.Action;
+						EatNuhUntil(' ');
+						toyield.Message = line.EatRemainderUntil('*');
+						break;
+					case '|': // part or quit
+						if (!line.Eat("|<-- ")) continue;
+						toyield.Type    = LineType.Part;
+						EatNuhUntil(' ');
+						toyield.Message = line.EatRemainder();
+						if ( toyield.Message.StartsWith("has quit") ) toyield.Type = LineType.Quit;
+						break;
+					case '-': // join
+						if (!line.Eat("-->| ")) continue;
+						toyield.Type    = LineType.Join;
+						EatNuhUntil(' ');
+						toyield.Message = line.EatRemainder();
+						break;
+					case '!': // kick
+						if (!line.Eat("!<-- ")) continue;
+						toyield.Type    = LineType.Kick;
+						toyield.Nick    = line.EatUntil(' ');
+						toyield.Message = line.EatRemainder();
+						break;
+					case '+': // meta
+						if (!line.Eat("+--+ ")) continue;
+						toyield.Type    = LineType.Meta;
+						EatNuhUntil(' ');
+						toyield.Message = line.EatRemainder();
+						break;
+					default:
+						continue;
+					}
 
-				switch ( line.Character ) {
-				case '<': // message
-					line.Eat('<');
-					toyield.Type    = LineType.Message;
-					EatNuhUntil('>');
-					if (!line.Eat(' ')) continue;
-					toyield.Message = line.EatRemainder();
-					break;
-				case '*': // action
-					line.Eat('*');
-					toyield.Type    = LineType.Action;
-					EatNuhUntil(' ');
-					toyield.Message = line.EatRemainderUntil('*');
-					break;
-				case '|': // part or quit
-					if (!line.Eat("|<-- ")) continue;
-					break;
-				case '-': // join
-					if (!line.Eat("-->| ")) continue;
-					toyield.Type    = LineType.Join;
-					EatNuhUntil(' ');
-					toyield.Message = line.EatRemainder();
-					break;
-				case '!': // kick
-					if (!line.Eat("!<-- ")) continue;
-					break;
-				case '+': // meta
-					if (!line.Eat("+--+ ")) continue;
-					break;
-				default:
-					continue;
+					yield return toyield;
 				}
-
-				yield return toyield;
 			}
-
-			yield break;
 		}
 	}
 }

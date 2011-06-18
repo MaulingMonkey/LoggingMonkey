@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Web;
+using LogsWebServer;
 
 namespace LoggingMonkey {
 	class HttpLogServer {
@@ -61,9 +65,10 @@ namespace LoggingMonkey {
 				DateTime from, to;
 				int linesOfContext;
 				if (!DateTime.TryParse(vars["from"]   ??"",out from     )) from    = DateTime.Now.AddMinutes(-15);
-				if (!DateTime.TryParse(vars["to"]     ??"",out to       )) to      = DateTime.Now;
+				if (!DateTime.TryParse(vars["to"]     ??"",out to       )) to      = DateTime.Now.AddMinutes(+15);
 				if (!int     .TryParse(vars["context"]??"",out linesOfContext)) linesOfContext = 0;
-				if ( linesOfContext < 0 ) linesOfContext = 0;
+				if ( linesOfContext <   0 ) linesOfContext = 0;
+				if ( linesOfContext > 100 ) linesOfContext = 100;
 
 				string network    = vars["server" ]   ?? "irc.afternet.org";
 				string channel    = vars["channel"]   ?? "#gamedev";
@@ -78,9 +83,9 @@ namespace LoggingMonkey {
 					| (casesensitive?RegexOptions.None:RegexOptions.IgnoreCase)
 					;
 
-				Regex nickquery = nickquerys==null ? null : querytype=="regex" ? new Regex(nickquerys,options) : new Regex(Regex.Escape(nickquerys),options);
-				Regex hostquery = hostquerys==null ? null : querytype=="regex" ? new Regex(hostquerys,options) : new Regex(Regex.Escape(hostquerys),options);
-				Regex query     = querys    ==null ? null : querytype=="regex" ? new Regex(querys    ,options) : new Regex(Regex.Escape(querys    ),options);
+				Regex nickquery = string.IsNullOrEmpty( nickquerys ) ? null : querytype=="regex" ? new Regex(nickquerys,options) : new Regex(Regex.Escape(nickquerys),options);
+				Regex hostquery = string.IsNullOrEmpty( hostquerys ) ? null : querytype=="regex" ? new Regex(hostquerys,options) : new Regex(Regex.Escape(hostquerys),options);
+				Regex query     = string.IsNullOrEmpty( querys     ) ? null : querytype=="regex" ? new Regex(querys    ,options) : new Regex(Regex.Escape(querys    ),options);
 
 				using ( var writer = new StreamWriter(context.Response.OutputStream) ) {
 					writer.WriteLine("<html><head>");
@@ -92,6 +97,7 @@ namespace LoggingMonkey {
 					writer.WriteLine("\t	a { color: blue; }");
 					writer.WriteLine("\t	.link { color: red; }");
 					writer.WriteLine("\t	.tooltip { display: none; background: black; color: white; padding: 5px; }");
+					writer.WriteLine("\t	.matched { background-color: #B0FFB0; }");
 					writer.WriteLine("\t</style>");
 					writer.WriteLine("</head><body>");
 					writer.WriteLine("	<div style=\"7pt; float: right; text-align: right\">");
@@ -126,7 +132,6 @@ namespace LoggingMonkey {
 					writer.WriteLine("			</table></td>");
 					writer.WriteLine("		</tr></table>");
 					writer.WriteLine("	</form>");
-					writer.WriteLine("	<hr>");
 
 					ChannelLogs clog = null;
 					if ( logs==null ) {
@@ -141,42 +146,116 @@ namespace LoggingMonkey {
 
 					if ( clog!=null ) {
 						var start2 = DateTime.Now;
-						int count = 0, linesMatched = 0;
-						lock (clog) count = clog.Count;
+						int linesMatched = 0;
+						int linesWritten = 0;
 
-						int lastLineOfContext = 0;
+						Action<FastLogReader.Line> write_nuh = (line) => {
+							writer.Write("<a title='");
+							writer.Write(HttpUtility.HtmlEncode(string.Format("{0}!{1}@{2}",line.Nick,line.User,line.Host)));
+							writer.Write("'>");
+							writer.Write(HttpUtility.HtmlEncode(line.Nick));
+							writer.Write("</a> ");
+							++linesWritten;
+						};
 
-						for ( int i = 0 ; i < count ; ++i ) {
-							ChannelLogs.Entry entry;
-							lock (clog) entry = clog[i];
+						Action<FastLogReader.Line> write = (line) => {
+							writer.Write("[");
+							writer.Write(line.When.ToString("g"));
+							writer.Write("] ");
 
-							if ( from <= entry.When && entry.When <= to )
-							if ( nickquery == null || nickquery.IsMatch(entry.NicknameHtml) )
-							if ( hostquery == null || hostquery.IsMatch(entry.NihHtml)      )
-							if ( query     == null || query    .IsMatch(entry.MessageHtml ) )
-							if ( linesOfContext == 0 )
-							{
-								++linesMatched;
-								writer.WriteLine(entry.CompleteHtml);
+							switch ( line.Type ) {
+							case FastLogReader.LineType.Action:
+								writer.Write("*");
+								write_nuh(line);
+								writer.Write(Program.HtmlizeUrls(HttpUtility.HtmlEncode(line.Message)));
+								writer.Write("*<br>\n");
+								break;
+							case FastLogReader.LineType.Message:
+								writer.Write("&lt;");
+								write_nuh(line);
+								writer.Write("&gt; ");
+								writer.Write(Program.HtmlizeUrls(HttpUtility.HtmlEncode(line.Message)));
+								writer.Write("<br>\n");
+								break;
+							case FastLogReader.LineType.Join:
+								writer.Write("-->| ");
+								write_nuh(line);
+								writer.Write(" ");
+								writer.Write(HttpUtility.HtmlEncode(line.Message));
+								writer.Write("<br>\n");
+								break;
+							case FastLogReader.LineType.Part:
+							case FastLogReader.LineType.Quit:
+								writer.Write("|<-- ");
+								write_nuh(line);
+								writer.Write(" ");
+								writer.Write(HttpUtility.HtmlEncode(line.Message));
+								writer.Write("<br>\n");
+								break;
+							case FastLogReader.LineType.Kick:
+								writer.Write("!<-- ");
+								writer.Write(HttpUtility.HtmlEncode(line.Nick));
+								writer.Write(" ");
+								writer.Write(HttpUtility.HtmlEncode(line.Message));
+								writer.Write("<br>\n");
+								break;
+							case FastLogReader.LineType.Meta:
+								writer.Write("+--+ ");
+								write_nuh(line);
+								writer.Write(" ");
+								writer.Write(HttpUtility.HtmlEncode(line.Message));
+								writer.Write("<br>\n");
+								break;
+							default:
+								writer.Write("??? ");
+								writer.Write(HttpUtility.HtmlEncode(line.Message));
+								writer.Write("<br>\n");
+								break;
 							}
-							else // linesOfContext != 0
-							{
+						};
+
+						int moreContext = -1;
+						Queue<FastLogReader.Line> PreContext = new Queue<FastLogReader.Line>();
+
+						if ( linesOfContext==0 ) writer.WriteLine("	<hr>");
+						bool highlight_matches = (nickquery!=null || hostquery!=null || query!=null) && linesOfContext>0;
+
+						foreach ( var line in FastLogReader.ReadAllLines(network,channel,from,to) ) {
+							bool lineMatch
+								=  ( from <= line.When && line.When <= to )
+								&& ( nickquery == null || nickquery.IsMatch(line.Nick   ??"") )
+								&& ( hostquery == null || hostquery.IsMatch(line.Host   ??"") )
+								&& ( query     == null || query    .IsMatch(line.Message??"") )
+								;
+
+							if ( lineMatch ) {
 								++linesMatched;
-								if ( lastLineOfContext!=0 && lastLineOfContext+1 < i-linesOfContext ) writer.WriteLine("<hr>");
-
-								int start = Math.Max( i-linesOfContext, lastLineOfContext+1 );
-								int end   = Math.Min( i+linesOfContext, count-1 );
-								lastLineOfContext = end;
-
-								for ( int i2 = start ; i2 <= end ; ++i2 ) {
-									ChannelLogs.Entry entry2;
-									lock (clog) entry2 = clog[i2];
-									writer.WriteLine(entry2.CompleteHtml);
+								// write out pre-context and write line
+								if ( linesOfContext!=0 && PreContext.Count>=linesOfContext && moreContext==-1 ) {
+									writer.WriteLine("<hr>");
 								}
+
+								while ( PreContext.Count>0 ) {
+									write(PreContext.Dequeue());
+								}
+								if ( highlight_matches ) writer.Write("<div class=\"matched\">");
+								write(line);
+								if ( highlight_matches ) writer.Write("</div>");
+								moreContext = linesOfContext;
+							} else if ( moreContext>0 ) { // not a match, but it's post-context
+								write(line);
+								--moreContext;
+							} else { // not a match, not immediate post-context, start feeding back into pre-context
+								if ( linesOfContext!=0 && PreContext.Count>=linesOfContext ) {
+									PreContext.Dequeue();
+									moreContext = -1;
+								}
+								if ( linesOfContext!=0 ) PreContext.Enqueue(line);
 							}
 						}
 						var stop2 = DateTime.Now;
-						writer.WriteLine( "Search returned {1} lines and took {0} seconds", (stop2-start2).TotalSeconds.ToString("N2"), linesMatched );
+						writer.WriteLine("	<hr>");
+						writer.WriteLine( "Search matched {1} lines, displayed {2}, and took {0} seconds", (stop2-start2).TotalSeconds.ToString("N2"), linesMatched, linesWritten );
 					}
 
 					writer.WriteLine("	<script type='text/javascript'> $(document).ready(function() { $('a[title]').tooltip(); });</script>");

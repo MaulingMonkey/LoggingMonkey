@@ -76,6 +76,12 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="FastLogs\LoggingMonkey.FastLogs.csproj">
+      <Project>{3F8B6EE8-8DB1-459D-A832-8BCB16DF26B7}</Project>
+      <Name>LoggingMonkey.FastLogs</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

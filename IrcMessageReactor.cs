@@ -40,7 +40,8 @@ namespace LoggingMonkey {
 						if ( (now-SpamLimiterList[host]).TotalMinutes < 1 ) {
 							network.Send( "PRIVMSG "+nick+ " :Stop spamming me ;_;" );
 						} else {
-							for ( int i = Math.Max(logs.Count-few,0) ; i < logs.Count ; ++i ) network.Send( "PRIVMSG "+nick+ " :"+HttpUtility.HtmlDecode(reTag.Replace(logs[i].CompleteHtml,"")) );
+							//for ( int i = Math.Max(logs.Count-few,0) ; i < logs.Count ; ++i ) network.Send( "PRIVMSG "+nick+ " :"+HttpUtility.HtmlDecode(reTag.Replace(logs[i].CompleteHtml,"")) );
+							network.Send( "PRIVMSG "+nick+" :!logs temporarilly disabled" );
 						}
 
 						SpamLimiterList[host]=now;

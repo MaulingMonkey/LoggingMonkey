@@ -14,7 +14,7 @@ namespace LoggingMonkey {
 		}
 	}
 
-	class ChannelLogs : List<ChannelLogs.Entry>, IDisposable {
+	class ChannelLogs : IDisposable {
 		public struct Entry {
 			public DateTime When;
 			public string PreambleHtml, NicknameHtml, NihHtml; // Nickname!Identity@Hostname
@@ -108,13 +108,6 @@ namespace LoggingMonkey {
 
 			var preamble = string.Intern(line.Substring(0,mWho.Index));
 			var message  = line.Substring(mWho.Index+mWho.Length);
-			lock (this) Add( new Entry()
-				{ When = when
-				, NicknameHtml = string.Intern(nick)
-				, NihHtml      = string.Intern(nih)
-				, PreambleHtml = preamble
-				, MessageHtml  = (preamble == " *" || preamble == " &lt;") ? Program.HtmlizeUrls(message) : message
-				});
 		}
 	}
 }
