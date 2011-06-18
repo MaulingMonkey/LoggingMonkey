@@ -154,7 +154,7 @@ namespace LoggingMonkey {
 							writer.Write(HttpUtility.HtmlEncode(string.Format("{0}!{1}@{2}",line.Nick,line.User,line.Host)));
 							writer.Write("'>");
 							writer.Write(HttpUtility.HtmlEncode(line.Nick));
-							writer.Write("</a> ");
+							writer.Write("</a>");
 							++linesWritten;
 						};
 
