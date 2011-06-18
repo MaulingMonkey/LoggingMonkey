@@ -155,10 +155,11 @@ namespace LoggingMonkey {
 							writer.Write("'>");
 							writer.Write(HttpUtility.HtmlEncode(line.Nick));
 							writer.Write("</a>");
-							++linesWritten;
 						};
 
 						Action<FastLogReader.Line> write = (line) => {
+							++linesWritten;
+
 							writer.Write("[");
 							writer.Write(line.When.ToString("g"));
 							writer.Write("] ");
