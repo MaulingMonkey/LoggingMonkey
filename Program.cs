@@ -47,7 +47,7 @@ namespace LoggingMonkey {
 #if DEBUG
 			var channels = new[] { "#sparta" };
 #else
-			var channels = new[] { "#gamedev", "#graphicschat", "#graphicsdev", "#anime" };
+			var channels = new[] { "#gamedev", "#graphicschat", "#graphicsdev", "#anime", "#starcraft" };
 #endif
 			var logs = new AllLogs() { { "irc.afternet.org", new NetworkLogs("irc.afternet.org",logpattern) } };
 			var afternet = logs["irc.afternet.org"];
