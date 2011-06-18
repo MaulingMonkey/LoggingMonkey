@@ -8,7 +8,6 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using LogsWebServer;
 
 namespace LoggingMonkey {
 	class HttpLogServer {

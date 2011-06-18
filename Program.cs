@@ -52,7 +52,7 @@ namespace LoggingMonkey {
 			var logs = new AllLogs() { { "irc.afternet.org", new NetworkLogs("irc.afternet.org",logpattern) } };
 			var afternet = logs["irc.afternet.org"];
 			foreach ( var ch in channels ) afternet.Channel(ch);
-
+			afternet.Channel("#gamedev");
 
 			Console.Write( "Beginning log server..." );
 			var server = new HttpLogServer();

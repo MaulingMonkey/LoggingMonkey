@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggingMonkey", "LoggingMonkey.csproj", "{F7A04568-1231-46F0-B336-6AF804D944E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggingMonkey.FastLogs", "FastLogs\LoggingMonkey.FastLogs.csproj", "{3F8B6EE8-8DB1-459D-A832-8BCB16DF26B7}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FD87F7D4-004D-4ACB-A3E5-0FFA0FEACF98}"
 	ProjectSection(SolutionItems) = preProject
 		Notes.txt = Notes.txt
@@ -26,12 +24,6 @@ Global
 		{F7A04568-1231-46F0-B336-6AF804D944E0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F7A04568-1231-46F0-B336-6AF804D944E0}.Release|x86.ActiveCfg = Release|x86
 		{F7A04568-1231-46F0-B336-6AF804D944E0}.Release|x86.Build.0 = Release|x86
-		{3F8B6EE8-8DB1-459D-A832-8BCB16DF26B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3F8B6EE8-8DB1-459D-A832-8BCB16DF26B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3F8B6EE8-8DB1-459D-A832-8BCB16DF26B7}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{3F8B6EE8-8DB1-459D-A832-8BCB16DF26B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3F8B6EE8-8DB1-459D-A832-8BCB16DF26B7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3F8B6EE8-8DB1-459D-A832-8BCB16DF26B7}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

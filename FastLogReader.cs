@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace LogsWebServer {
+namespace LoggingMonkey {
 	struct FastLineReader {
 		string Line;
 		int LineIndex;
@@ -176,6 +176,9 @@ namespace LogsWebServer {
 
 					bool am = line.Character=='a' || line.Character=='A';
 					bool pm = line.Character=='p' || line.Character=='P';
+					if (H==12) H-=12;
+					if (pm) H+=12;
+
 					if (!am&&!pm) continue;
 					line.EatAny();
 					if (!(line.Eat('m') || line.Eat('M'))) continue;
