@@ -157,8 +157,8 @@ namespace LoggingMonkey {
 			FileEntry[] files = GetFiles(network,channel);
 
 			foreach ( var file in files ) {
-				if ( file.Date.AddDays(1) < start ) continue;
-				if ( file.Date > end ) continue;
+				if ( file.Date < start.Date ) continue;
+				if ( file.Date > end  .Date ) continue;
 
 				using ( var reader = new StreamReader(File.Open(file.Name,FileMode.Open,FileAccess.Read,FileShare.ReadWrite)) )
 				for ( string rawline ; (rawline=reader.ReadLine()) != null ; )
