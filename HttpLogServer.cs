@@ -168,6 +168,7 @@ namespace LoggingMonkey {
 								writer.Write("*");
 								write_nuh(line);
 								writer.Write(Program.HtmlizeUrls(HttpUtility.HtmlEncode(line.Message)));
+								writer.Write(" ");
 								writer.Write("*<br>\n");
 								break;
 							case FastLogReader.LineType.Message:
