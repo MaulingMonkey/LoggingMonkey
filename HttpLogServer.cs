@@ -66,8 +66,8 @@ namespace LoggingMonkey {
 				if (!DateTime.TryParse(vars["from"]   ??"",out from     )) from    = DateTime.Now.AddMinutes(-15);
 				if (!DateTime.TryParse(vars["to"]     ??"",out to       )) to      = DateTime.Now.AddMinutes(+15);
 				if (!int     .TryParse(vars["context"]??"",out linesOfContext)) linesOfContext = 0;
-				if ( linesOfContext <   0 ) linesOfContext = 0;
-				if ( linesOfContext > 100 ) linesOfContext = 100;
+				if ( linesOfContext <     0 ) linesOfContext = 0;
+				if ( linesOfContext > 10000 ) linesOfContext = 10000;
 
 				string network    = vars["server" ]   ?? "irc.afternet.org";
 				string channel    = vars["channel"]   ?? "#gamedev";

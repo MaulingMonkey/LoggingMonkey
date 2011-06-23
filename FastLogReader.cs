@@ -230,7 +230,7 @@ namespace LoggingMonkey {
 					case '+': // meta
 						if (!line.Eat("+--+ ")) continue;
 						toyield.Type    = LineType.Meta;
-						EatNuhUntil(' ');
+						EatNuhUntil(' '); // FIXME: Might not actually be a NUH (e.g. "+--+ *.afternet.org has set ...)
 						toyield.Message = line.EatRemainder();
 						break;
 					default:
