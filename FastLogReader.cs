@@ -118,39 +118,24 @@ namespace LoggingMonkey {
 			public string Name, Network, Channel;
 		}
 
-		static DateTime LastFileListUpdate;
-		static List<FileEntry> FileList;
-		static object          FileListMutex = new object();
-
 		static FileEntry[] GetFiles( string network, string channel ) {
-			var today = DateTime.Now.Date;
-
-			FileEntry[] files;
-			lock ( FileListMutex ) {
-				if ( FileList == null || today != LastFileListUpdate ) {
-					LastFileListUpdate = today;
-					FileList = new List<FileEntry>( Directory
-						.GetFiles(@"I:\home\logs\", "*.log", SearchOption.TopDirectoryOnly )
-						.Select( file => {
-							var m = reLogFilename.Match(file);
-							return new FileEntry()
-								{ Name  = file
-								, Year  = int.Parse(m.Groups["year" ].Value)
-								, Month = int.Parse(m.Groups["month"].Value)
-								, Day   = int.Parse(m.Groups["day"  ].Value)
-								, Network = m.Groups["network"].Value
-								, Channel = m.Groups["channel"].Value
-								};
-						})
-						.OrderBy( file => file.Date )
-						);
-				}
-				files = FileList
-					.Where( file => file.Network==network && file.Channel==channel )
-					.ToArray()
-					;
-			}
-			return files;
+			return Directory
+				.GetFiles(@"I:\home\logs\", "*.log", SearchOption.TopDirectoryOnly )
+				.Select( file => {
+					var m = reLogFilename.Match(file);
+					return new FileEntry()
+						{ Name  = file
+						, Year  = int.Parse(m.Groups["year" ].Value)
+						, Month = int.Parse(m.Groups["month"].Value)
+						, Day   = int.Parse(m.Groups["day"  ].Value)
+						, Network = m.Groups["network"].Value
+						, Channel = m.Groups["channel"].Value
+						};
+				})
+				.Where( file => file.Network==network && file.Channel==channel )
+				.OrderBy( file => file.Date )
+				.ToArray()
+				;
 		}
 
 		public static IEnumerable<Line> ReadAllLines( string network, string channel, DateTime start, DateTime end ) {
