@@ -45,21 +45,37 @@ namespace LoggingMonkey {
 			lock (Listener) logs = _Logs;
 
 			try {
-				if ( context.Request.Url.AbsolutePath != "/" ) {
+				// Handle special cases:
+				switch ( context.Request.Url.AbsolutePath ) {
+				case "/":
+					break; // we'll handle this normally
+				case "/robots.txt":
+					context.Response.ContentEncoding = Encoding.UTF8;
+					context.Response.ContentType = "text/plain";
+					using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) ) {
+						writer.Write
+							( "User-agent: *\n"
+							+ "Disallow: /\n"
+							);
+					}
+					return; // EARLY BAIL
+				default:
 					context.Response.StatusCode = 404;
 					context.Response.ContentEncoding = Encoding.UTF8;
 					context.Response.ContentType = "text/html";
 					using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) ) {
 						writer.Write
 							(  "<html><head>\n"
-							+  "	<title>Forbidden</title>\n"
+							+  "	<title>No such page</title>\n"
 							+  "</head><body>\n"
-							+  "	Access forbidden to "+context.Request.Url.AbsoluteUri+"\n"
+							+  "	No such page "+context.Request.Url.AbsoluteUri+"\n"
 							+  "</body></html>\n"
 							);
 					}
+					return; // EARLY BAIL
 				}
 
+				// handle normally:
 				var vars = context.Request.QueryString;
 				DateTime from, to;
 				int linesOfContext;
