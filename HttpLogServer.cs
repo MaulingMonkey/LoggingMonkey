@@ -90,8 +90,12 @@ namespace LoggingMonkey {
 				string nickquerys = vars["nickquery"] ?? null;
 				string hostquerys = vars["hostquery"] ?? null;
 				string querys     = vars["query"]     ?? null;
-				bool casesensitive = vars["casesensitive"]=="true";
-				string querytype = vars["querytype"]  ?? "plaintext";
+				string querytype  = vars["querytype"] ?? "plaintext";
+
+				Func<string,bool> bools = s => new[]{"true","1"}.Contains((vars[s]??"").ToLowerInvariant());
+
+				bool casesensitive = bools("casesensitive");
+				bool cats          = bools("cats");
 
 				var options
 					= RegexOptions.Compiled
@@ -184,14 +188,14 @@ namespace LoggingMonkey {
 								writer.Write("*");
 								write_nuh(line);
 								writer.Write(" ");
-								writer.Write(Program.HtmlizeUrls(HttpUtility.HtmlEncode(line.Message)));
+								writer.Write(Program.HtmlizeUrls(HttpUtility.HtmlEncode(line.Message),cats));
 								writer.Write("*<br>\n");
 								break;
 							case FastLogReader.LineType.Message:
 								writer.Write("&lt;");
 								write_nuh(line);
 								writer.Write("&gt; ");
-								writer.Write(Program.HtmlizeUrls(HttpUtility.HtmlEncode(line.Message)));
+								writer.Write(Program.HtmlizeUrls(HttpUtility.HtmlEncode(line.Message),cats));
 								writer.Write("<br>\n");
 								break;
 							case FastLogReader.LineType.Join:

@@ -29,8 +29,14 @@ namespace LoggingMonkey {
 			else return "http://"+url;
 		}
 
-		public static string HtmlizeUrls( string text ) {
-			return reUrlPatterns.Replace( text, m => { var url=GuessAndPrependProtocol(m.Value); return "<a rel=\"nofollow\" class=\"link\" target=\"_blank\" href=\""+url+"\">"+m.Value+"</a>"; } );
+		public static string HtmlizeUrls( string text, bool cats ) {
+			return reUrlPatterns.Replace( text, m => {
+				var url=GuessAndPrependProtocol(m.Value);
+
+				if ( cats && url.StartsWith("http://zao.se/~zao/cats/") ) return "<img src=\""+url+"\" alt=\"cats\">";
+
+				return "<a rel=\"nofollow\" class=\"link\" target=\"_blank\" href=\""+url+"\">"+m.Value+"</a>";
+			});
 		}
 
 		static void Main() {
