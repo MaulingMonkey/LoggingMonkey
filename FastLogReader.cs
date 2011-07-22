@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace LoggingMonkey {
 	struct FastLineReader {
@@ -79,8 +78,6 @@ namespace LoggingMonkey {
 	}
 
 	public static class FastLogReader {
-		static readonly Regex reLogFilename = new Regex(@".*\\(?<network>[^-\\]+)-(?<channel>#[^-\\]+)-(?<year>\d+)-(?<month>\d+)-(?<day>\d+)\.log",RegexOptions.Compiled);
-
 		public enum LineType {
 			Message, Action,
 			Join, Part, Quit, Kick,
@@ -120,9 +117,9 @@ namespace LoggingMonkey {
 
 		static FileEntry[] GetFiles( string network, string channel ) {
 			return Directory
-				.GetFiles(@"I:\home\logs\", "*.log", SearchOption.TopDirectoryOnly )
+				.GetFiles(Program.LogsDirectory, "*.log", SearchOption.TopDirectoryOnly )
 				.Select( file => {
-					var m = reLogFilename.Match(file);
+					var m = Program.reLogFilename.Match(file);
 					return new FileEntry()
 						{ Name  = file
 						, Year  = int.Parse(m.Groups["year" ].Value)

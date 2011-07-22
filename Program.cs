@@ -9,6 +9,10 @@ using System.Diagnostics;
 
 namespace LoggingMonkey {
 	class Program {
+		public static readonly string PasswordPath  = @"I:\home\scripts\bmpass.txt";
+		public static readonly string BackupPath    = @"I:\home\logs-backup.zip";
+		public static readonly string LogsDirectory = @"I:\home\logs\";
+
 		public static readonly string fWhen = @"\[(?<when>[^\]]+)\]";
 		public static readonly Regex reWhen = new Regex("^"+fWhen, RegexOptions.Compiled);
 		public static readonly Regex reLogFilename = new Regex(@".*\\(?<network>[^-\\]+)-(?<channel>#[^-\\]+)-(?<year>\d+)-(?<month>\d+)-(?<day>\d+)\.log",RegexOptions.Compiled);
@@ -49,7 +53,7 @@ namespace LoggingMonkey {
 			var procstart = DateTime.Now;
 			Console.WriteLine( "=== Process start at {0} ===", procstart );
 
-			var logpattern = @"I:\home\logs\{network}-{channel}-{year}-{month}-{day}.log";
+			var logpattern = LogsDirectory+"{network}-{channel}-{year}-{month}-{day}.log";
 #if DEBUG
 			var channels = new[] { "#sparta" };
 #else
@@ -76,7 +80,7 @@ namespace LoggingMonkey {
 
 			Console.Write("Getting directory list...");
 			var files = Directory
-				.GetFiles(@"I:\home\logs\", "*.log", SearchOption.TopDirectoryOnly )
+				.GetFiles(LogsDirectory, "*.log", SearchOption.TopDirectoryOnly )
 				.OrderBy( file => {
 					var m = reLogFilename.Match(file);
 					return new DateTime

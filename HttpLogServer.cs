@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Packaging;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -57,6 +58,40 @@ namespace LoggingMonkey {
 							( "User-agent: *\n"
 							+ "Disallow: /\n"
 							);
+					}
+					return; // EARLY BAIL
+				case "/backup.zip":
+					// TODO: Handle multiple backup.zip requests
+					Stream zip = null;
+					try {
+						zip = File.Open( Program.BackupPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None );
+					} catch ( IOException ) {
+						context.Response.ContentEncoding = Encoding.UTF8;
+						context.Response.ContentType = "text/plain";
+						context.Response.StatusCode = 503;
+						using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) ) {
+							writer.Write("Couldn't open backup zip (already backing up?)\n");
+						}
+						return; // EARLY BAIL
+					}
+
+					using ( zip ) {
+						using ( var package = ZipPackage.Open(zip,FileMode.Create) ) {
+							foreach ( var logfile in Directory.GetFiles(Program.LogsDirectory,"*.log",SearchOption.TopDirectoryOnly) ) {
+								var relfile = Uri.EscapeDataString( Path.GetFileName(logfile) );
+								var uri = PackUriHelper.CreatePartUri( new Uri(relfile,UriKind.Relative) );
+								var part = package.CreatePart( uri, System.Net.Mime.MediaTypeNames.Text.Plain, CompressionOption.Maximum );
+								using ( var fstream = File.Open(logfile,FileMode.Open,FileAccess.Read,FileShare.ReadWrite) ) using ( var partstream = part.GetStream() ) fstream.CopyTo(partstream);
+								package.Flush();
+							}
+							package.Close();
+						}
+						zip.Flush();
+						zip.Position = 0;
+
+						context.Response.ContentType = "application/zip";
+						context.Response.ContentLength64 = zip.Length;
+						zip.CopyTo(context.Response.OutputStream);
 					}
 					return; // EARLY BAIL
 				default:
