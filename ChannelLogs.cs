@@ -67,6 +67,7 @@ namespace LoggingMonkey {
 					.MustReplace( "{day}"    , today.Day  .ToString() )
 					;
 
+				if ( File.Exists(filename.Replace("#","%23")) ) filename = filename.Replace("#","%23");
 				StreamWriter = new StreamWriter( File.Open( filename, FileMode.Append, FileAccess.Write, FileShare.Read ), Encoding.UTF8 );
 			}
 		}

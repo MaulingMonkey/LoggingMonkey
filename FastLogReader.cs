@@ -126,7 +126,7 @@ namespace LoggingMonkey {
 						, Month = int.Parse(m.Groups["month"].Value)
 						, Day   = int.Parse(m.Groups["day"  ].Value)
 						, Network = m.Groups["network"].Value
-						, Channel = m.Groups["channel"].Value
+						, Channel = m.Groups["channel"].Value.Replace("%23","#")
 						};
 				})
 				.Where( file => file.Network==network && file.Channel==channel )
