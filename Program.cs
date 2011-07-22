@@ -15,9 +15,10 @@ namespace LoggingMonkey {
 		/// </summary>
 		public static readonly bool IsOnUnix = new[]{PlatformID.Unix,PlatformID.MacOSX,(PlatformID)128}.Any(p=>Environment.OSVersion.Platform == p);
 
-		public static readonly string PasswordPath  = IsOnUnix ? @"/home/loggingmonkey/password.txt"    : @"I:\home\scripts\bmpass.txt";
-		public static readonly string BackupPath    = IsOnUnix ? @"/home/loggingmonkey/logs-backup.zip" : @"I:\home\logs-backup.zip";
-		public static readonly string LogsDirectory = IsOnUnix ? @"/home/loggingmonkey/logs/"           : @"I:\home\logs\";
+		public static readonly string PasswordPath   = IsOnUnix ? @"/home/loggingmonkey/password.txt"    : @"I:\home\scripts\bmpass.txt";
+		public static readonly string BackupPath     = IsOnUnix ? @"/home/loggingmonkey/logs-backup.zip" : @"I:\home\logs-backup.zip";
+		public static readonly string LogsDirectory  = IsOnUnix ? @"/home/loggingmonkey/logs/"           : @"I:\home\logs\";
+		public static readonly string ExceptionsPath = IsOnUnix ? @"/home/loggingmonkey/exceptions.txt"  : null;
 
 		public static readonly string fWhen = @"\[(?<when>[^\]]+)\]";
 		public static readonly Regex reWhen = new Regex("^"+fWhen, RegexOptions.Compiled);

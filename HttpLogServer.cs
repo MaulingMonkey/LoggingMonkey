@@ -326,8 +326,10 @@ namespace LoggingMonkey {
 					writer.WriteLine("	<script type='text/javascript'> $(document).ready(function() { $('a[title]').tooltip(); });</script>");
 					writer.WriteLine("</body></html>");
 				}
-			} catch ( Exception ) {
-				//
+			} catch ( Exception e ) {
+				if ( Program.IsOnUnix ) {
+					File.AppendAllText( Program.ExceptionsPath, e.ToString() );
+				}
 			} finally {
 				context.Response.Close();
 			}
