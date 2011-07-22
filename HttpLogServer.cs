@@ -17,11 +17,11 @@ namespace LoggingMonkey {
 		public HttpLogServer() {
 #if DEBUG
 			Listener = new HttpListener()
-				{ Prefixes = { "http://logs2.pandamojo.com/" }
+				{ Prefixes = { "http://logs2.pandamojo.com/" + (Program.IsOnUnix?":8080":"") }
 				};
 #else
 			Listener = new HttpListener()
-				{ Prefixes = { "http://logs.pandamojo.com/" }
+				{ Prefixes = { "http://logs.pandamojo.com/" + (Program.IsOnUnix?":8080":"") }
 				};
 #endif
 			Listener.Start();
