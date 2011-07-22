@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Web;
-using System.Diagnostics;
 
 namespace LoggingMonkey {
 	class Program {
@@ -50,7 +47,7 @@ namespace LoggingMonkey {
 			});
 		}
 
-		static void Main() {
+		static void Main( string[] args ) {
 			bool cancel = false;
 			try {
 				Console.CancelKeyPress += (sender,args) => {
@@ -125,7 +122,14 @@ namespace LoggingMonkey {
 
 			for (;;) {
 				Console.Write("> ");
-				var command = Console.ReadLine();
+				string command;
+				try {
+					command = Console.ReadLine();
+					if ( command == null ) for (;;) {}
+				} catch ( NullReferenceException ) {
+					for (;;) {}
+					return;
+				}
 				cancel = false;
 				var split = command.Split(new[]{' '});
 
