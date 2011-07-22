@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Text;
+using System.Globalization;
 
 namespace LoggingMonkey {
 	static class ExtensionMethods {
@@ -81,7 +82,7 @@ namespace LoggingMonkey {
 			Debug.Assert( string.IsNullOrEmpty(input.Groups["network"].Value) || input.Groups["network"].Value == Network );
 
 			var line = outputformat
-				.Replace( "{when}"   , when.ToString("T") )
+				.Replace( "{when}"   , when.ToString("T",CultureInfo.InvariantCulture) )
 				.Replace( "{channel}", Channel )
 				.Replace( "{network}", Network )
 				;
