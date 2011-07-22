@@ -47,7 +47,7 @@ namespace LoggingMonkey {
 			});
 		}
 
-		static void Main( string[] args ) {
+		static void Main() {
 			bool cancel = false;
 			try {
 				Console.CancelKeyPress += (sender,args) => {
