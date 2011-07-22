@@ -22,7 +22,7 @@ namespace LoggingMonkey {
 
 		public static readonly string fWhen = @"\[(?<when>[^\]]+)\]";
 		public static readonly Regex reWhen = new Regex("^"+fWhen, RegexOptions.Compiled);
-		public static readonly Regex reLogFilename = new Regex(@".*\\(?<network>[^-\\]+)-(?<channel>#[^-\\]+)-(?<year>\d+)-(?<month>\d+)-(?<day>\d+)\.log",RegexOptions.Compiled);
+		public static readonly Regex reLogFilename = new Regex(@".*[\\/](?<network>[^-\\/]+)-(?<channel>#[^-\\/]+)-(?<year>\d+)-(?<month>\d+)-(?<day>\d+)\.log",RegexOptions.Compiled);
 		public static readonly Regex reWho = new Regex(@"(?<nick>[^*;! ]+)!(?<user>[^@ ]+)@(?<host>[^&> ]+)", RegexOptions.Compiled);
 		public static readonly Regex reUrlProtocol = new Regex("^"+fUrlProtocol,RegexOptions.Compiled);
 		public static readonly Regex reUrlPatterns = new Regex(@"\b(?:" + fUrlProtocol + "|"  + fUrlTLD + "|"  + fUrlBLD + ")", RegexOptions.Compiled);
