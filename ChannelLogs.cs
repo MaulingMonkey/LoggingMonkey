@@ -82,7 +82,7 @@ namespace LoggingMonkey {
 			Debug.Assert( string.IsNullOrEmpty(input.Groups["network"].Value) || input.Groups["network"].Value == Network );
 
 			var line = outputformat
-				.Replace( "{when}"   , when.ToString("T",CultureInfo.InvariantCulture) )
+				.Replace( "{when}"   , when.ToString("T",Program.Culture) )
 				.Replace( "{channel}", Channel )
 				.Replace( "{network}", Network )
 				;

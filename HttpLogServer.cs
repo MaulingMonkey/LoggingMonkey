@@ -188,8 +188,8 @@ namespace LoggingMonkey {
 					writer.WriteLine("					<br><input name=\"querytype\"     value=\"regex\"     type=\"radio\"    {0}> <label>Regex Match</label>"   , querytype=="regex"     ? "checked" : "" );
 					writer.WriteLine("				</td></tr>");
 					writer.WriteLine("			</table></td><td><table>");
-					writer.WriteLine("				<tr><td><label>From:   </label></td><td><input name=\"from\"    value=\"{0}\"></td></tr>", from);
-					writer.WriteLine("				<tr><td><label>To:     </label></td><td><input name=\"to\"      value=\"{0}\"></td></tr>", to  );
+					writer.WriteLine("				<tr><td><label>From:   </label></td><td><input name=\"from\"    value=\"{0}\"></td></tr>", from.ToString(Program.Culture) );
+					writer.WriteLine("				<tr><td><label>To:     </label></td><td><input name=\"to\"      value=\"{0}\"></td></tr>", to  .ToString(Program.Culture) );
 					writer.WriteLine("				<tr><td><label>Context:</label></td><td><input name=\"context\" value=\"{0}\"></td></tr>", linesOfContext );
 					writer.WriteLine("				<tr><td>                       </td><td><input type=\"submit\"  value=\"Search\"></td></tr>");
 					writer.WriteLine("			</table></td>");

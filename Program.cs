@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Globalization;
 
 namespace LoggingMonkey {
 	class Program {
@@ -11,6 +12,8 @@ namespace LoggingMonkey {
 		/// http://www.mono-project.com/FAQ:_Technical (see "How to detect the execution platform ?")
 		/// </summary>
 		public static readonly bool IsOnUnix = new[]{PlatformID.Unix,PlatformID.MacOSX,(PlatformID)128}.Any(p=>Environment.OSVersion.Platform == p);
+
+		public static readonly CultureInfo Culture = new CultureInfo("en-US",false);
 
 		public static readonly string PasswordPath   = IsOnUnix ? @"/home/loggingmonkey/password.txt"    : @"I:\home\scripts\bmpass.txt";
 		public static readonly string BackupPath     = IsOnUnix ? @"/home/loggingmonkey/logs-backup.zip" : @"I:\home\logs-backup.zip";
