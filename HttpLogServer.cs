@@ -211,6 +211,7 @@ namespace LoggingMonkey {
 						var start2 = DateTime.Now;
 						int linesMatched = 0;
 						int linesWritten = 0;
+						int linesSearched= 0;
 
 						Action<FastLogReader.Line> write_nuh = (line) => {
 							writer.Write("<a title='");
@@ -293,6 +294,7 @@ namespace LoggingMonkey {
 								&& ( query     == null || query    .IsMatch(line.Message??"") )
 								;
 
+							++linesSearched;
 							if ( lineMatch ) {
 								++linesMatched;
 								// write out pre-context and write line
@@ -320,7 +322,7 @@ namespace LoggingMonkey {
 						}
 						var stop2 = DateTime.Now;
 						writer.WriteLine("	<hr>");
-						writer.WriteLine( "Search matched {1} lines, displayed {2}, and took {0} seconds", (stop2-start2).TotalSeconds.ToString("N2"), linesMatched, linesWritten );
+						writer.WriteLine( "Search matched {1} lines, displayed {2}, searched {3}, and took {0} seconds", (stop2-start2).TotalSeconds.ToString("N2"), linesMatched, linesWritten, linesSearched );
 					}
 
 					writer.WriteLine("	<script type='text/javascript'> $(document).ready(function() { $('a[title]').tooltip(); });</script>");
