@@ -225,7 +225,7 @@ namespace LoggingMonkey {
 							++linesWritten;
 
 							writer.Write("[");
-							writer.Write(line.When.ToString("g"));
+							writer.Write(line.When.ToString("g",Program.Culture));
 							writer.Write("] ");
 
 							switch ( line.Type ) {
