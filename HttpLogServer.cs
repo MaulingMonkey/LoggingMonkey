@@ -167,6 +167,7 @@ namespace LoggingMonkey {
 					writer.WriteLine("		Contact: MaulingMonkey in #gamedev [<a href=\"irc://irc.afternet.org/gamedev\">irc://</a>][<a href=\"http://www.gamedev.net/community/chat/\">java</a>]<br>");
 					writer.WriteLine("	</div>");
 					writer.WriteLine("	<form method=\"get\" action=\".\">");
+					if ( cats ) writer.WriteLine("		<input type=\"hidden\" value=\"true\" name=\"cats\">");
 					writer.WriteLine("		<table><tr>");
 					writer.WriteLine("			<td><table>");
 					writer.WriteLine("				<tr><td><label>Network:</label></td><td><input name=\"server\"  value=\"{0}\"></td></tr>", network);
