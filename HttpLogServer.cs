@@ -107,7 +107,8 @@ namespace LoggingMonkey {
 							(  "<html><head>\n"
 							+  "	<title>No such page</title>\n"
 							+  "</head><body>\n"
-							+  "	No such page "+context.Request.Url.AbsoluteUri+"\n"
+							+  "	No such page "+context.Request.Url.AbsoluteUri+"<br>\n"
+							+  "	Try <a href=\"/\">"+context.Request.Url.Host+"</a> instead you silly git<br>\n"
 							+  "</body></html>\n"
 							);
 					}
