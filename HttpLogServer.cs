@@ -128,6 +128,7 @@ namespace LoggingMonkey {
 				string network    = vars["server" ]   ?? "irc.afternet.org";
 				string channel    = vars["channel"]   ?? "#gamedev";
 				string nickquerys = vars["nickquery"] ?? null;
+				string userquerys = vars["userquery"] ?? null;
 				string hostquerys = vars["hostquery"] ?? null;
 				string querys     = vars["query"]     ?? null;
 				string querytype  = vars["querytype"] ?? "plaintext";
@@ -143,9 +144,20 @@ namespace LoggingMonkey {
 					| (casesensitive?RegexOptions.None:RegexOptions.IgnoreCase)
 					;
 
-				Regex nickquery = string.IsNullOrEmpty( nickquerys ) ? null : querytype=="regex" ? new Regex(nickquerys,options) : new Regex(Regex.Escape(nickquerys),options);
-				Regex hostquery = string.IsNullOrEmpty( hostquerys ) ? null : querytype=="regex" ? new Regex(hostquerys,options) : new Regex(Regex.Escape(hostquerys),options);
-				Regex query     = string.IsNullOrEmpty( querys     ) ? null : querytype=="regex" ? new Regex(querys    ,options) : new Regex(Regex.Escape(querys    ),options);
+				Func<string,Regex> query_to_regex = input => {
+					if ( string.IsNullOrEmpty(input) ) return null;
+					switch ( querytype ) {
+					case "regex":     return new Regex(input,options);
+					case "wildcard":  return new Regex("^"+Regex.Escape(input).Replace(@"\*","(.*)").Replace(@"\?",".")+"$",options);
+					case "plaintext": return new Regex(Regex.Escape(input),options);
+					default: goto case "plaintext";
+					}
+				};
+
+				Regex nickquery = query_to_regex(nickquerys);
+				Regex userquery = query_to_regex(userquerys);
+				Regex hostquery = query_to_regex(hostquerys);
+				Regex query     = query_to_regex(querys    );
 
 				using ( var writer = new StreamWriter(context.Response.OutputStream) ) {
 					writer.WriteLine("<html><head>");
@@ -182,11 +194,13 @@ namespace LoggingMonkey {
 
 					writer.WriteLine("				<tr><td></td><td>Search Parameters</td></tr>");
 					writer.WriteLine("				<tr><td><label>Nickname:</label></td><td><input name=\"nickquery\"   value=\"{0}\"></td></tr>", nickquerys ?? "" );
+					writer.WriteLine("				<tr><td><label>Username:</label></td><td><input name=\"userquery\"   value=\"{0}\"></td></tr>", userquerys ?? "" );
 					writer.WriteLine("				<tr><td><label>Hostname:</label></td><td><input name=\"hostquery\"   value=\"{0}\"></td></tr>", hostquerys ?? "" );
 					writer.WriteLine("				<tr><td><label>Message:</label></td><td><input  name=\"query\"       value=\"{0}\"></td></tr>", querys     ?? "" );
 					writer.WriteLine("				<tr><td></td><td>");
 					writer.WriteLine("					    <input name=\"casesensitive\" value=\"true\"      type=\"checkbox\" {0}> <label>Case Sensitive</label>", casesensitive          ? "checked" : "" );
 					writer.WriteLine("					<br><input name=\"querytype\"     value=\"plaintext\" type=\"radio\"    {0}> <label>Plain Text</label>"    , querytype=="plaintext" ? "checked" : "" );
+					writer.WriteLine("					<br><input name=\"querytype\"     value=\"wildcard\"  type=\"radio\"    {0}> <label>Wildcard Match</label>", querytype=="wildcard"  ? "checked" : "" );
 					writer.WriteLine("					<br><input name=\"querytype\"     value=\"regex\"     type=\"radio\"    {0}> <label>Regex Match</label>"   , querytype=="regex"     ? "checked" : "" );
 					writer.WriteLine("				</td></tr>");
 					writer.WriteLine("			</table></td><td><table>");
@@ -292,6 +306,7 @@ namespace LoggingMonkey {
 							bool lineMatch
 								=  ( from <= line.When && line.When <= to )
 								&& ( nickquery == null || nickquery.IsMatch(line.Nick   ??"") )
+								&& ( userquery == null || userquery.IsMatch(line.User   ??"") )
 								&& ( hostquery == null || hostquery.IsMatch(line.Host   ??"") )
 								&& ( query     == null || query    .IsMatch(line.Message??"") )
 								;
