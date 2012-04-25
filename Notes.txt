@@ -1,4 +1,0 @@
-[4/12/2011 11:53 PM] <Sirisian> MaulingMonkey, change your logs to use http://assaultwars.com/javascript/04B_03__.TTF save that and at the top of the logs put: http://pastebin.com/kYGNYU5V and set the font to 8px '04b03';
-Enable monospace!
-Enable tinyfont!
-http://img861.imageshack.us/img861/9576/clipboardg.png

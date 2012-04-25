@@ -36,6 +36,11 @@ namespace LoggingMonkey {
 			}
 		}
 
+		/// <summary>
+		/// Nearly identical to Program.reWho, but allows * in nicks
+		/// </summary>
+		static readonly Regex reBanMask = new Regex(@"(?<nick>[^;! ]+)!(?<user>[^@ ]+)@(?<host>[^&> ]+)", RegexOptions.Compiled);
+
 		void OnGetContext( IAsyncResult result ) {
 			if ( !Listener.IsListening ) return;
 
@@ -159,6 +164,20 @@ namespace LoggingMonkey {
 				Regex hostquery = query_to_regex(hostquerys);
 				Regex query     = query_to_regex(querys    );
 
+				if ( string.IsNullOrEmpty(userquerys) && string.IsNullOrEmpty(hostquerys) )
+				{
+					Match nuh = reBanMask.Match(nickquerys);
+					if ( nuh.Success )
+					{
+						var oldqt = querytype;
+						querytype = "wildcard";
+						nickquery = query_to_regex( nuh.Groups["nick"].Value );
+						userquery = query_to_regex( nuh.Groups["user"].Value );
+						hostquery = query_to_regex( nuh.Groups["host"].Value );
+						querytype = oldqt;
+					}
+				}
+
 				using ( var writer = new StreamWriter(context.Response.OutputStream) ) {
 					writer.WriteLine("<html><head>");
 					writer.WriteLine("\t<title>{0} -- {1} ({2} - {3})</title>", network, channel, from, to );
@@ -178,6 +197,7 @@ namespace LoggingMonkey {
 					writer.WriteLine("</head><body>");
 					writer.WriteLine("	<div style=\"7pt; float: right; text-align: right\">");
 					writer.WriteLine("		Contact: MaulingMonkey in #gamedev [<a href=\"irc://irc.afternet.org/gamedev\">irc://</a>][<a href=\"http://www.gamedev.net/community/chat/\">java</a>]<br>");
+					writer.WriteLine("		Timestamps are in PST/PDT<BR>");
 					writer.WriteLine("	</div>");
 					writer.WriteLine("	<form method=\"get\" action=\".\">");
 					if ( cats ) writer.WriteLine("		<input type=\"hidden\" value=\"true\" name=\"cats\">");
@@ -193,16 +213,16 @@ namespace LoggingMonkey {
 					}
 
 					writer.WriteLine("				<tr><td></td><td>Search Parameters</td></tr>");
-					writer.WriteLine("				<tr><td><label>Nickname:</label></td><td><input name=\"nickquery\"   value=\"{0}\"></td></tr>", nickquerys ?? "" );
-					writer.WriteLine("				<tr><td><label>Username:</label></td><td><input name=\"userquery\"   value=\"{0}\"></td></tr>", userquerys ?? "" );
-					writer.WriteLine("				<tr><td><label>Hostname:</label></td><td><input name=\"hostquery\"   value=\"{0}\"></td></tr>", hostquerys ?? "" );
-					writer.WriteLine("				<tr><td><label>Message:</label></td><td><input  name=\"query\"       value=\"{0}\"></td></tr>", querys     ?? "" );
+					writer.WriteLine("				<tr><td><label>Nickname:</label></td><td><input name=\"nickquery\"   value=\"{0}\"></td><td>(or wildcard mask)</td></tr>", nickquerys ?? "" );
+					writer.WriteLine("				<tr><td><label>Username:</label></td><td><input name=\"userquery\"   value=\"{0}\"></td><td></td></tr>", userquerys ?? "" );
+					writer.WriteLine("				<tr><td><label>Hostname:</label></td><td><input name=\"hostquery\"   value=\"{0}\"></td><td></td></tr>", hostquerys ?? "" );
+					writer.WriteLine("				<tr><td><label>Message:</label></td><td><input  name=\"query\"       value=\"{0}\"></td><td></td></tr>", querys     ?? "" );
 					writer.WriteLine("				<tr><td></td><td>");
 					writer.WriteLine("					    <input name=\"casesensitive\" value=\"true\"      type=\"checkbox\" {0}> <label>Case Sensitive</label>", casesensitive          ? "checked" : "" );
 					writer.WriteLine("					<br><input name=\"querytype\"     value=\"plaintext\" type=\"radio\"    {0}> <label>Plain Text</label>"    , querytype=="plaintext" ? "checked" : "" );
 					writer.WriteLine("					<br><input name=\"querytype\"     value=\"wildcard\"  type=\"radio\"    {0}> <label>Wildcard Match</label>", querytype=="wildcard"  ? "checked" : "" );
 					writer.WriteLine("					<br><input name=\"querytype\"     value=\"regex\"     type=\"radio\"    {0}> <label>Regex Match</label>"   , querytype=="regex"     ? "checked" : "" );
-					writer.WriteLine("				</td></tr>");
+					writer.WriteLine("				</td><td></td></tr>");
 					writer.WriteLine("			</table></td><td><table>");
 					writer.WriteLine("				<tr><td><label>From:   </label></td><td><input name=\"from\"    value=\"{0}\"></td></tr>", from.ToString(Program.Culture) );
 					writer.WriteLine("				<tr><td><label>To:     </label></td><td><input name=\"to\"      value=\"{0}\"></td></tr>", to  .ToString(Program.Culture) );
