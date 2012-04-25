@@ -164,7 +164,7 @@ namespace LoggingMonkey {
 				Regex hostquery = query_to_regex(hostquerys);
 				Regex query     = query_to_regex(querys    );
 
-				if ( string.IsNullOrEmpty(userquerys) && string.IsNullOrEmpty(hostquerys) )
+				if ( !string.IsNullOrEmpty(nickquerys) && string.IsNullOrEmpty(userquerys) && string.IsNullOrEmpty(hostquerys) )
 				{
 					Match nuh = reBanMask.Match(nickquerys);
 					if ( nuh.Success )
@@ -365,10 +365,14 @@ namespace LoggingMonkey {
 					writer.WriteLine("	<script type='text/javascript'> $(document).ready(function() { $('a[title]').tooltip(); });</script>");
 					writer.WriteLine("</body></html>");
 				}
+#if !DEBUG
 			} catch ( Exception e ) {
 				if ( Program.IsOnUnix ) {
 					File.AppendAllText( Program.ExceptionsPath, e.ToString() );
+				} else if( Debugger.IsAttached ) {
+					Debugger.Break();
 				}
+#endif
 			} finally {
 				context.Response.Close();
 			}
