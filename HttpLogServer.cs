@@ -137,6 +137,7 @@ namespace LoggingMonkey {
 				string hostquerys = vars["hostquery"] ?? null;
 				string querys     = vars["query"]     ?? null;
 				string querytype  = vars["querytype"] ?? "plaintext";
+				string timefmt    = vars["timefmt"]   ?? "pst";
 
 				Func<string,bool> bools = s => new[]{"true","1"}.Contains((vars[s]??"").ToLowerInvariant());
 
@@ -188,7 +189,11 @@ namespace LoggingMonkey {
 						writer.WriteLine("\t	@font-face { font-family: \"04b03\"; src: url(\"/04B_03__.TTF\") format(\"truetype\"); }");
 						writer.WriteLine("\t	* { font-family: \"04b03\"; font-size: 8px; }");
 					}
+#if DEBUG
+					writer.WriteLine("\t	table, tr, td { cell-spacing: 0; padding: 0; margin: 0; border: 1px solid black; border-collapse: collapse; vertical-align: top; }");
+#else
 					writer.WriteLine("\t	table, tr, td { cell-spacing: 0; padding: 0; margin: 0; border-collapse: collapse; vertical-align: top; }");
+#endif
 					writer.WriteLine("\t	a { color: blue; }");
 					writer.WriteLine("\t	.link { color: red; }");
 					writer.WriteLine("\t	.tooltip { display: none; background: black; color: white; padding: 5px; }");
@@ -224,9 +229,13 @@ namespace LoggingMonkey {
 					writer.WriteLine("					<br><input name=\"querytype\"     value=\"regex\"     type=\"radio\"    {0}> <label>Regex Match</label>"   , querytype=="regex"     ? "checked" : "" );
 					writer.WriteLine("				</td><td></td></tr>");
 					writer.WriteLine("			</table></td><td><table>");
-					writer.WriteLine("				<tr><td><label>From:   </label></td><td><input name=\"from\"    value=\"{0}\"></td></tr>", from.ToString(Program.Culture) );
-					writer.WriteLine("				<tr><td><label>To:     </label></td><td><input name=\"to\"      value=\"{0}\"></td></tr>", to  .ToString(Program.Culture) );
-					writer.WriteLine("				<tr><td><label>Context:</label></td><td><input name=\"context\" value=\"{0}\"></td></tr>", linesOfContext );
+					writer.WriteLine("				<tr><td><label>From:   </label></td><td><input name=\"from\"    value=\"{0}\"> (12h PST)</td></tr>", from.ToString(Program.Culture) );
+					writer.WriteLine("				<tr><td><label>To:     </label></td><td><input name=\"to\"      value=\"{0}\"> (12h PST)</td></tr>", to  .ToString(Program.Culture) );
+					writer.WriteLine("				<tr><td><label>Context:</label></td><td><input name=\"context\" value=\"{0}\"> (12h PST)</td></tr>", linesOfContext );
+					writer.WriteLine("				<tr><td>                       </td><td>Display Format:</td></tr>" );
+					writer.WriteLine("				<tr><td colspan=\"2\"><input name=\"timefmt\" type=\"radio\" value=\"pst\"     {0}> <label>M/D H:MM [AM,PM] (PST)</label></td></tr>"       , (timefmt=="pst"    ) ? "checked" : "" );
+					writer.WriteLine("				<tr><td colspan=\"2\"><input name=\"timefmt\" type=\"radio\" value=\"longpst\" {0}> <label>M/D/YY H:MM:SS [AM,PM] (PST)</label></td></tr>" , (timefmt=="longpst") ? "checked" : "" );
+					writer.WriteLine("				<tr><td colspan=\"2\"><input name=\"timefmt\" type=\"radio\" value=\"longutc\" {0}> <label>M/D/YY H:MM:SS (24h) (UTC)</label></td></tr>"   , (timefmt=="longutc") ? "checked" : "" );
 					writer.WriteLine("				<tr><td>                       </td><td><input type=\"submit\"  value=\"Search\"></td></tr>");
 					writer.WriteLine("			</table></td>");
 					writer.WriteLine("		</tr></table>");
@@ -242,6 +251,8 @@ namespace LoggingMonkey {
 					} else {
 						clog = logs[network].Channel(channel);
 					}
+
+					var pst = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
 
 					if ( clog!=null ) {
 						var start2 = DateTime.Now;
@@ -261,7 +272,15 @@ namespace LoggingMonkey {
 							++linesWritten;
 
 							writer.Write("[");
-							writer.Write(line.When.ToString("g",Program.Culture));
+							switch( timefmt )
+							{
+							case "longpst": writer.Write( line.When.ToString("M/d/yy hh:mm:ss tt",Program.Culture) ); break;
+							case "longutc": writer.Write( TimeZoneInfo.ConvertTimeToUtc( line.When, pst ).ToString("M/d/yy HH:mm:ss",Program.Culture) ); break;
+							case "pst":
+							default:
+								writer.Write(line.When.ToString("M/d h:mm tt",Program.Culture));
+								break;
+							}
 							writer.Write("] ");
 
 							switch ( line.Type ) {
