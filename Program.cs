@@ -51,10 +51,8 @@ namespace LoggingMonkey {
 		}
 
 		static void Main() {
-			bool cancel = false;
 			try {
 				Console.CancelKeyPress += (sender,args) => {
-					cancel=true;
 					args.Cancel = true;
 				};
 			} catch ( NullReferenceException ) {
@@ -130,10 +128,8 @@ namespace LoggingMonkey {
 					command = Console.ReadLine();
 					if ( command == null ) for (;;) {}
 				} catch ( NullReferenceException ) {
-					for (;;) {}
-					return;
+					for (;;);
 				}
-				cancel = false;
 				var split = command.Split(new[]{' '});
 
 				switch ( split[0] ) {

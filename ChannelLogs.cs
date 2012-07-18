@@ -16,27 +16,6 @@ namespace LoggingMonkey {
 	}
 
 	class ChannelLogs : IDisposable {
-		public struct Entry {
-			public DateTime When;
-			public string PreambleHtml, NicknameHtml, NihHtml; // Nickname!Identity@Hostname
-			public string MessageHtml;
-
-			public string CompleteHtml { get {
-				var sb = new StringBuilder();
-				sb.Append("[");
-				sb.Append(When.ToString("g"));
-				sb.Append("]");
-				sb.Append(PreambleHtml);
-				sb.Append("<a title='");
-				sb.Append(NihHtml);
-				sb.Append("'>");
-				sb.Append(NicknameHtml);
-				sb.Append("</a>");
-				sb.Append(MessageHtml);
-				sb.AppendLine("<br>");
-				return sb.ToString();
-			}}
-		}
 
 		string Network, Channel, FileNamePattern;
 

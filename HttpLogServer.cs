@@ -13,6 +13,10 @@ using System.Web;
 namespace LoggingMonkey {
 	class HttpLogServer {
 		readonly HttpListener Listener;
+		readonly CachedHashedWebCsvFile Tor = new CachedHashedWebCsvFile
+			( Path.Combine(Path.GetTempPath(),"tor.csv")
+			, @"http://torstatus.blutmagie.de/ip_list_all.php/Tor_ip_list_ALL.csv"
+			);
 
 		public HttpLogServer() {
 #if DEBUG
@@ -183,7 +187,7 @@ namespace LoggingMonkey {
 					writer.WriteLine("<html><head>");
 					writer.WriteLine("\t<title>{0} -- {1} ({2} - {3})</title>", network, channel, from, to );
 					writer.WriteLine("\t<meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\">");
-					writer.WriteLine("\t<script type=\"text/javascript\" src=\"http://cdn.jquerytools.org/1.2.5/jquery.tools.min.js\"></script>");
+					writer.WriteLine("\t<script type=\"text/javascript\" src=\"http://cdn.jquerytools.org/1.2.7/jquery.tools.min.js\"></script>");
 					writer.WriteLine("\t<style type=\"text/css\">");
 					if ( tiny ) {
 						writer.WriteLine("\t	@font-face { font-family: \"04b03\"; src: url(\"/04B_03__.TTF\") format(\"truetype\"); }");
@@ -194,8 +198,9 @@ namespace LoggingMonkey {
 #else
 					writer.WriteLine("\t	table, tr, td { cell-spacing: 0; padding: 0; margin: 0; border-collapse: collapse; vertical-align: top; }");
 #endif
-					writer.WriteLine("\t	a { color: blue; }");
-					writer.WriteLine("\t	.link { color: red; }");
+					writer.WriteLine("\t	a        { color: blue; }");
+					writer.WriteLine("\t	a.tor    { color: red; }");
+					writer.WriteLine("\t	.link    { color: red; }");
 					writer.WriteLine("\t	.tooltip { display: none; background: black; color: white; padding: 5px; }");
 					writer.WriteLine("\t	.matched { background-color: #B0FFB0; }");
 					writer.WriteLine("\t</style>");
@@ -261,10 +266,13 @@ namespace LoggingMonkey {
 						int linesSearched= 0;
 
 						Action<FastLogReader.Line> write_nuh = (line) => {
-							writer.Write("<a title='");
-							writer.Write(HttpUtility.HtmlEncode(string.Format("{0}!{1}@{2}",line.Nick,line.User,line.Host)));
+							bool isTor = Tor.Lines.Contains(line.Host) || DnsCache.ResolveDontWait(line.Host).Any(ipv4=>Tor.Lines.Contains(ipv4));
+							writer.Write("<a class='{0}' title='",isTor?"tor":"nottor");
+							writer.Write(HttpUtility.HtmlEncode(string.Format("{0}!{1}@{2}{3}",line.Nick,line.User,line.Host,isTor?" !TOR!":"")));
 							writer.Write("'>");
+							if( isTor ) writer.Write("&#9760; ");
 							writer.Write(HttpUtility.HtmlEncode(line.Nick));
+							if( isTor ) writer.Write(" &#9760;");
 							writer.Write("</a>");
 						};
 

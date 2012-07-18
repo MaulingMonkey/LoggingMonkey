@@ -69,7 +69,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Assets.resx</DependentUpon>
     </Compile>
+    <Compile Include="CachedWebFile.cs" />
     <Compile Include="ChannelLogs.cs" />
+    <Compile Include="DnsCache.cs" />
     <Compile Include="FastLogReader.cs" />
     <Compile Include="HttpLogServer.cs" />
     <Compile Include="IIrcMessageReactor.cs" />
