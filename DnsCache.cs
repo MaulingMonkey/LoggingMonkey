@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Globalization;
 
 namespace LoggingMonkey {
 	static class DnsCache {
@@ -27,7 +28,17 @@ namespace LoggingMonkey {
 
 		static readonly string[] Empty = new string[0];
 
+		static bool KnownFalseHost( string dns )
+		{
+			return string.IsNullOrEmpty(dns)
+				|| dns.EndsWith(".users.afternet.org",false,CultureInfo.InvariantCulture)
+				;
+		}
+
 		public static string[] ResolveDontWait( string dns ) {
+			if( KnownFalseHost(dns) )
+				return Empty;
+
 			lock( HostToIpv4 )
 				if( HostToIpv4.ContainsKey(dns) )
 					return HostToIpv4[dns];
