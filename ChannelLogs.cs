@@ -16,6 +16,7 @@ namespace LoggingMonkey {
 	}
 
 	class ChannelLogs : IDisposable {
+		public bool RequireAuth = false;
 
 		string Network, Channel, FileNamePattern;
 

@@ -52,6 +52,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -63,6 +64,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessControl.cs" />
     <Compile Include="AllLogs.cs" />
     <Compile Include="Assets.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -73,6 +75,7 @@
     <Compile Include="ChannelLogs.cs" />
     <Compile Include="DnsCache.cs" />
     <Compile Include="FastLogReader.cs" />
+    <Compile Include="FileLineList.cs" />
     <Compile Include="HttpLogServer.cs" />
     <Compile Include="IIrcMessageReactor.cs" />
     <Compile Include="IrcMessageRegexReactor.cs" />

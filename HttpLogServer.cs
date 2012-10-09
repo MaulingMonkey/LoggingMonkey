@@ -19,15 +19,9 @@ namespace LoggingMonkey {
 			);
 
 		public HttpLogServer() {
-#if DEBUG
 			Listener = new HttpListener()
-				{ Prefixes = { "http://logs2.pandamojo.com" + (Program.IsOnUnix?":8080":"") + "/" }
+				{ Prefixes = { Program.PrimaryPrefix }
 				};
-#else
-			Listener = new HttpListener()
-				{ Prefixes = { "http://logs.pandamojo.com" + (Program.IsOnUnix?":8080":"") + "/" }
-				};
-#endif
 			Listener.Start();
 			Listener.BeginGetContext(OnGetContext,null);
 		}
@@ -45,20 +39,59 @@ namespace LoggingMonkey {
 		/// </summary>
 		static readonly Regex reBanMask = new Regex(@"(?<nick>[^;! ]+)!(?<user>[^@ ]+)@(?<host>[^&> ]+)", RegexOptions.Compiled);
 
+		AccessControlStatus GetAuth( HttpListenerContext context )
+		{
+			// Determine auth
+			AccessControlStatus acs = AccessControlStatus.Error;
+			foreach( Cookie cookie in context.Request.Cookies )
+			if( cookie.Name == Program.AuthCookieName )
+			{
+				acs = AccessControl.GetStatus( cookie.Value );
+				break;
+			}
+			return acs;
+		}
+
+		bool Allow( AccessControlStatus acs )
+		{
+			switch( acs )
+			{
+			case AccessControlStatus.Error:
+				return Program.AutoAllow;
+			case AccessControlStatus.Blacklisted:
+				return false;
+			default:
+				return true;
+			}
+		}
+
+		static readonly Regex reAuthQuery = new Regex( @"^\?token=(?<token>.*)$", RegexOptions.Compiled );
+
 		void OnGetContext( IAsyncResult result ) {
 			if ( !Listener.IsListening ) return;
 
 			Listener.BeginGetContext( OnGetContext, null );
 			var context = Listener.EndGetContext(result);
 
+			var acs = GetAuth(context);
+
 			AllLogs logs;
-			lock (Listener) logs = _Logs;
+			lock( Listener ) logs = _Logs;
 
 			try {
 				// Handle special cases:
 				switch ( context.Request.Url.AbsolutePath.ToLowerInvariant() ) {
 				case "/":
 					break; // we'll handle this normally
+				case "/auth":
+					var m = reAuthQuery.Match( context.Request.Url.Query ?? "" );
+					if( m.Success && m.Groups["token"].Success )
+					{
+						var cookie = new Cookie(Program.AuthCookieName,HttpUtility.UrlDecode(m.Groups["token"].Value));
+						context.Response.Cookies.Add(cookie);
+						acs = AccessControl.GetStatus( cookie.Value );
+					}
+					break;
 				case "/robots.txt":
 					context.Response.ContentEncoding = Encoding.UTF8;
 					context.Response.ContentType = "text/plain";
@@ -74,6 +107,24 @@ namespace LoggingMonkey {
 					context.Response.OutputStream.Write(font,0,font.Length);
 					return; // EARLY BAIL
 				case "/backup.zip":
+					if( !Allow(acs) )
+					{
+						context.Response.StatusCode = 401;
+						context.Response.ContentEncoding = Encoding.UTF8;
+						context.Response.ContentType = "text/html";
+						using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) )
+						{
+							writer.Write
+								( "<html><head>\n"
+								+ "	<title>" + acs.ToString() + "</title>\n"
+								+ "</head><body>\n"
+								+ "	Your ID has " + ((acs==AccessControlStatus.Blacklisted) ? "been blacklisted" : "not yet been whitelisted") + "<br>\n"
+								+ "</body></html>\n"
+								);
+						}
+						return;// Require auth
+					}
+
 					// TODO: Handle multiple backup.zip requests
 					Stream zip = null;
 					try {
@@ -143,6 +194,9 @@ namespace LoggingMonkey {
 				string querytype  = vars["querytype"] ?? "plaintext";
 				string timefmt    = vars["timefmt"]   ?? "pst";
 
+				
+
+
 				Func<string,bool> bools = s => new[]{"true","1"}.Contains((vars[s]??"").ToLowerInvariant());
 
 				bool casesensitive = bools("casesensitive");
@@ -183,6 +237,9 @@ namespace LoggingMonkey {
 					}
 				}
 
+				if( !Allow(acs) )
+					return;// Require auth
+
 				using ( var writer = new StreamWriter(context.Response.OutputStream) ) {
 					writer.WriteLine("<html><head>");
 					writer.WriteLine("\t<title>{0} -- {1} ({2} - {3})</title>", network, channel, from, to );
@@ -203,6 +260,7 @@ namespace LoggingMonkey {
 					writer.WriteLine("\t	.link    { color: red; }");
 					writer.WriteLine("\t	.tooltip { display: none; background: black; color: white; padding: 5px; }");
 					writer.WriteLine("\t	.matched { background-color: #B0FFB0; }");
+					writer.WriteLine("\t	.notice  { color: white; font-weight: bold; background: #AE0E20; }");
 					writer.WriteLine("\t</style>");
 					writer.WriteLine("</head><body>");
 					writer.WriteLine("	<div style=\"7pt; float: right; text-align: right\">");
@@ -253,6 +311,9 @@ namespace LoggingMonkey {
 						writer.WriteLine( "	Not serving logs for {0}", network );
 					} else if ( !logs[network].HasChannel(channel) ) {
 						writer.WriteLine( "	Not serving logs for {0}", channel );
+					} else if ( !Allow(acs) ) {
+						writer.WriteLine( "	Not (yet) authorized to access channel logs for {0}", channel );
+						clog = null;
 					} else {
 						clog = logs[network].Channel(channel);
 					}
@@ -260,6 +321,12 @@ namespace LoggingMonkey {
 					var pst = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
 
 					if ( clog!=null ) {
+						if( acs == AccessControlStatus.Error )
+						{
+							writer.WriteLine("<hr>");
+							writer.WriteLine("<div class=\"notice\">NOTICE: LoggingMonkey will soon switch to a whitelist.  You don't currently have an authorization cookie set -- please PM LoggingMonkey !auth for a biodegradable and reusable authorization link.  #gamedev ban-ees need not apply.</div>");
+						}
+
 						var start2 = DateTime.Now;
 						int linesMatched = 0;
 						int linesWritten = 0;

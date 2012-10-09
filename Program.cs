@@ -6,12 +6,18 @@ using System.Threading;
 using System.Globalization;
 
 namespace LoggingMonkey {
-	class Program {
+	static class Program {
 		/// <summary>
 		/// Detect UNIXy platform
 		/// http://www.mono-project.com/FAQ:_Technical (see "How to detect the execution platform ?")
 		/// </summary>
 		public static readonly bool IsOnUnix = new[]{PlatformID.Unix,PlatformID.MacOSX,(PlatformID)128}.Any(p=>Environment.OSVersion.Platform == p);
+
+#if DEBUG
+		public static readonly string PrimaryPrefix = "http://logs2.pandamojo.com" + (Program.IsOnUnix?":8080":"") + "/";
+#else
+		public static readonly string PrimaryPrefix = "http://logs.pandamojo.com" + (Program.IsOnUnix?":8080":"") + "/";
+#endif
 
 		public static readonly CultureInfo Culture = new CultureInfo("en-US",false);
 
@@ -19,6 +25,13 @@ namespace LoggingMonkey {
 		public static readonly string BackupPath     = IsOnUnix ? @"/home/loggingmonkey/logs-backup.zip" : @"I:\home\logs-backup.zip";
 		public static readonly string LogsDirectory  = IsOnUnix ? @"/home/loggingmonkey/logs/"           : @"I:\home\logs\";
 		public static readonly string ExceptionsPath = IsOnUnix ? @"/home/loggingmonkey/exceptions.txt"  : null;
+		public static readonly string RsaKey         = IsOnUnix ? @"/home/loggingmonkey/key.dsa"      : @"I:\home\configs\lm-key.dsa";
+		public static readonly string AuthCookieName = "LoggingMonkeyAuth";
+		public static bool AutoAllow { get { return !IsOnUnix && File.Exists(@"I:\home\configs\lm-autoallow.txt"); } }
+
+		public static readonly string BlacklistPath = IsOnUnix ? @"/home/loggingmonkey/blacklist.txt" : @"I:\home\configs\lm-blacklist.txt";
+		public static readonly string PendingPath   = IsOnUnix ? @"/home/loggingmonkey/pending.txt"   : @"I:\home\configs\lm-pending.txt";
+		public static readonly string WhitelistPath = IsOnUnix ? @"/home/loggingmonkey/whitelist.txt" : @"I:\home\configs\lm-whitelist.txt";
 
 		public static readonly string fWhen = @"\[(?<when>[^\]]+)\]";
 		public static readonly Regex reWhen = new Regex("^"+fWhen, RegexOptions.Compiled);
@@ -65,12 +78,15 @@ namespace LoggingMonkey {
 			var logpattern = LogsDirectory+"{network}-{channel}-{year}-{month}-{day}.log";
 #if DEBUG
 			var channels = new[] { "#sparta" };
+			var whitelistChannels = new[] { "#sparta" };
 #else
 			var channels = new[] { "#gamedev", "#graphicschat", "#graphicsdev", "#anime", "#starcraft" };
+			var whitelistChannels = new[] { "#gamedev" };
 #endif
 			var logs = new AllLogs() { { "irc.afternet.org", new NetworkLogs("irc.afternet.org",logpattern) } };
 			var afternet = logs["irc.afternet.org"];
 			foreach ( var ch in channels ) afternet.Channel(ch);
+			foreach ( var ch in whitelistChannels ) afternet.Channel(ch).RequireAuth = true;
 			afternet.Channel("#gamedev");
 
 			Console.Write( "Beginning log server..." );
@@ -122,7 +138,7 @@ namespace LoggingMonkey {
 			Console.WriteLine("Logs now being served.");
 
 			for (;;) {
-				Console.Write("> ");
+				//Console.Write("> ");
 				string command;
 				try {
 					command = Console.ReadLine();

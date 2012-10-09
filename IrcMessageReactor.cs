@@ -27,7 +27,7 @@ namespace LoggingMonkey {
 			{ { @"^\:(?<who>[^ ]+) PRIVMSG (?<channels>[^ ]+) \:?\001ACTION (?<message>.+)\001$" , "[{when}] *{who} {message}*" }
 			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!last (?<few>\d+)$", (network,m) => {
 				var channel = m.Groups["channel"].Value;
-				if ( network.Channels.Contains(channel) ) {
+				if( network.Channels.Contains(channel) ) {
 					var logs = network.Logs.Channel(channel);
 					try {
 						var who = m.Groups["who"].Value;
@@ -47,7 +47,22 @@ namespace LoggingMonkey {
 						SpamLimiterList[host]=now;
 					} catch ( Exception ) {}
 					logs.Log(m,"[{when}] <{who}> !last {few}");
+					Console.WriteLine("{0} used !last",m.Groups["who"].Value);
 				}
+			}}
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!auth$", (network,m) => {
+				var channel = m.Groups["channel"].Value;
+				if( network.Channels.Contains(channel) )
+					network.Logs.Channel(channel).Log(m,"[{when}] <{who}> !auth");
+
+				try {
+					var who = m.Groups["who"].Value;
+					var nick = who.Substring(0,who.IndexOf('!'));
+					var host = who.Substring(who.IndexOf('@')+1);
+					var token = AccessControl.RequestToken(who);
+					network.Send( "NOTICE "+nick+ " :"+Program.PrimaryPrefix+"auth?token="+HttpUtility.UrlEncode(token) );
+					Console.WriteLine("{0} used !auth, responded with token {1}",who,token);
+				} catch ( Exception ) {}
 			}}
 			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channels>[^ ]+) \:?(?<message>.+)$"                , "[{when}] <{who}> {message}" }
 			, { @"^\:(?<who>[^ ]+) JOIN (?<channels>[^ ]+)$"                                     , "[{when}] -->| {who} has joined {channel}" }
