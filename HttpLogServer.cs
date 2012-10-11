@@ -238,9 +238,6 @@ namespace LoggingMonkey {
 					}
 				}
 
-				if( !Allow(acs) )
-					return;// Require auth
-
 				using ( var writer = new StreamWriter(context.Response.OutputStream) ) {
 					writer.WriteLine("<html><head>");
 					writer.WriteLine("\t<title>{0} -- {1} ({2} - {3})</title>", network, channel, from, to );
@@ -307,16 +304,18 @@ namespace LoggingMonkey {
 
 					ChannelLogs clog = null;
 					if ( logs==null ) {
-						writer.WriteLine( "	Logs are currently loading.  Reload this page in a minute.");
+						writer.WriteLine( "<div class=\"notice\">Logs are currently loading.  Reload this page in a minute.</div>");
 					} else lock (logs) if ( !logs.ContainsKey(network) ) {
-						writer.WriteLine( "	Not serving logs for {0}", network );
+						writer.WriteLine( "<div class=\"notice\">Not serving logs for {0}</div>", network );
 					} else if ( !logs[network].HasChannel(channel) ) {
-						writer.WriteLine( "	Not serving logs for {0}", channel );
-					} else if ( !Allow(acs) ) {
-						writer.WriteLine( "	Not (yet) authorized to access channel logs for {0}", channel );
-						clog = null;
+						writer.WriteLine( "<div class=\"notice\">Not serving logs for {0}</div>", channel );
 					} else {
 						clog = logs[network].Channel(channel);
+						if ( clog.RequireAuth && !Allow(acs) )
+						{
+							writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}</div>", channel );
+							clog = null;
+						}
 					}
 
 					var pst = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
