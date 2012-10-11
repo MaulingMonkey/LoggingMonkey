@@ -313,7 +313,13 @@ namespace LoggingMonkey {
 						clog = logs[network].Channel(channel);
 						if ( clog.RequireAuth && !Allow(acs) )
 						{
-							writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}</div>", channel );
+							switch( acs )
+							{
+							case AccessControlStatus.Error:			writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  PM LoggingMonkey !auth to set an authorization cookie.</div>", channel ); break;
+							case AccessControlStatus.Whitelisted:	writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  You're somehow simultaniously whitelisted yet not allowed in.</div>", channel ); break;
+							case AccessControlStatus.Pending:		writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  Authorization cookie set, whitelisting pending.</div>", channel ); break;
+							case AccessControlStatus.Blacklisted:	writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  Authorization cookie set, whitelisting pending...</div>", channel ); break;
+							}
 							clog = null;
 						}
 					}
@@ -321,7 +327,7 @@ namespace LoggingMonkey {
 					var pst = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
 
 					if ( clog!=null ) {
-						if( acs == AccessControlStatus.Error )
+						if( clog.RequireAuth && acs == AccessControlStatus.Error )
 						{
 							writer.WriteLine("<hr>");
 							writer.WriteLine("<div class=\"notice\">NOTICE: LoggingMonkey will soon switch to a whitelist.  You don't currently have an authorization cookie set -- please PM LoggingMonkey !auth for a biodegradable and reusable authorization link.  #gamedev ban-ees need not apply.</div>");
