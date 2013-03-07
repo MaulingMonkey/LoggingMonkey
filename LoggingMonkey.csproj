@@ -84,9 +84,12 @@
     <Compile Include="Network.cs" />
     <Compile Include="NetworkLogs.cs" />
     <Compile Include="Parallel.cs" />
+    <Compile Include="Paths.cs" />
+    <Compile Include="Platform.cs" />
     <Compile Include="Pretty.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Regexps.cs" />
     <Compile Include="_ Extension Methods.cs" />
   </ItemGroup>
   <ItemGroup>

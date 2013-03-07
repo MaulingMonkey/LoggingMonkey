@@ -77,8 +77,8 @@ namespace LoggingMonkey {
 			StreamWriter.Flush();
 
 			line = HttpUtility.HtmlEncode(line);
-			line = Program.reWhen.Replace( line, m => "" );
-			var mWho = Program.reWho.Match( line );
+			line = Regexps.LogWhen.Replace( line, m => "" );
+			var mWho = Regexps.LogWho.Match( line );
 			Debug.Assert( mWho.Success );
 			string nick, nih;
 			if ( mWho.Success ) {

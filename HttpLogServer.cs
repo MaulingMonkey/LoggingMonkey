@@ -168,7 +168,7 @@ namespace LoggingMonkey {
 			// TODO: Handle multiple backup.zip requests
 			Stream zip = null;
 			try {
-				zip = File.Open( Program.BackupPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None );
+				zip = File.Open( Paths.BackupZip, FileMode.Create, FileAccess.ReadWrite, FileShare.None );
 			} catch ( IOException ) {
 				context.Response.ContentEncoding = Encoding.UTF8;
 				context.Response.ContentType = "text/plain";
@@ -181,7 +181,7 @@ namespace LoggingMonkey {
 
 			using ( zip ) {
 				using ( var package = ZipPackage.Open(zip,FileMode.Create) ) {
-					foreach ( var logfile in Directory.GetFiles(Program.LogsDirectory,"*.log",SearchOption.TopDirectoryOnly) ) {
+					foreach ( var logfile in Directory.GetFiles(Paths.LogsDirectory,"*.log",SearchOption.TopDirectoryOnly) ) {
 						var relfile = Uri.EscapeDataString( Path.GetFileName(logfile) );
 						var uri = PackUriHelper.CreatePartUri( new Uri(relfile,UriKind.Relative) );
 						var part = package.CreatePart( uri, System.Net.Mime.MediaTypeNames.Text.Plain, CompressionOption.Maximum );

@@ -98,7 +98,7 @@ namespace LoggingMonkey {
 
 		static string Password = null;
 		static Network() {
-			try { Password = File.ReadAllText(Program.PasswordPath); } catch ( Exception ) {}
+			try { Password = File.ReadAllText(Paths.PasswordTxt); } catch ( Exception ) {}
 		}
 	}
 }

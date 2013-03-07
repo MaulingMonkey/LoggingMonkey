@@ -117,9 +117,9 @@ namespace LoggingMonkey {
 
 		static FileEntry[] GetFiles( string network, string channel ) {
 			return Directory
-				.GetFiles(Program.LogsDirectory, "*.log", SearchOption.TopDirectoryOnly )
+				.GetFiles(Paths.LogsDirectory, "*.log", SearchOption.TopDirectoryOnly )
 				.Select( file => {
-					var m = Program.reLogFilename.Match(file);
+					var m = Regexps.LogFilename.Match(file);
 					return new FileEntry()
 						{ Name  = file
 						, Year  = int.Parse(m.Groups["year" ].Value)

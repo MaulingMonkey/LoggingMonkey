@@ -1,52 +1,26 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Globalization;
 
 namespace LoggingMonkey {
 	static class Program {
-		/// <summary>
-		/// Detect UNIXy platform
-		/// http://www.mono-project.com/FAQ:_Technical (see "How to detect the execution platform ?")
-		/// </summary>
-		public static readonly bool IsOnUnix = new[]{PlatformID.Unix,PlatformID.MacOSX,(PlatformID)128}.Any(p=>Environment.OSVersion.Platform == p);
 
 #if DEBUG
-		public static readonly string PrimaryPrefix = "http://logs2.pandamojo.com" + (Program.IsOnUnix?":8080":"") + "/";
+		public static readonly string PrimaryPrefix = "http://logs2.pandamojo.com" + (Platform.IsOnUnix?":8080":"") + "/";
 #else
-		public static readonly string PrimaryPrefix = "http://logs.pandamojo.com" + (Program.IsOnUnix?":8080":"") + "/";
+		public static readonly string PrimaryPrefix = "http://logs.pandamojo.com" + (Platform.IsOnUnix?":8080":"") + "/";
 #endif
 
 		public static readonly CultureInfo Culture = new CultureInfo("en-US",false);
 
-		public static readonly string PasswordPath   = IsOnUnix ? @"/home/loggingmonkey/password.txt"    : @"I:\home\scripts\bmpass.txt";
-		public static readonly string BackupPath     = IsOnUnix ? @"/home/loggingmonkey/logs-backup.zip" : @"I:\home\logs-backup.zip";
-		public static readonly string LogsDirectory  = IsOnUnix ? @"/home/loggingmonkey/logs/"           : @"I:\home\logs\";
-		public static readonly string ExceptionsPath = IsOnUnix ? @"/home/loggingmonkey/exceptions.txt"  : null;
-		public static readonly string RsaKey         = IsOnUnix ? @"/home/loggingmonkey/key.dsa"      : @"I:\home\configs\lm-key.dsa";
 		public static readonly string AuthCookieName = "LoggingMonkeyAuth";
-		public static bool AutoAllow { get { return !IsOnUnix && File.Exists(@"I:\home\configs\lm-autoallow.txt"); } }
-
-		public static readonly string BlacklistPath = IsOnUnix ? @"/home/loggingmonkey/blacklist.txt" : @"I:\home\configs\lm-blacklist.txt";
-		public static readonly string PendingPath   = IsOnUnix ? @"/home/loggingmonkey/pending.txt"   : @"I:\home\configs\lm-pending.txt";
-		public static readonly string WhitelistPath = IsOnUnix ? @"/home/loggingmonkey/whitelist.txt" : @"I:\home\configs\lm-whitelist.txt";
-
-		public static readonly string fWhen = @"\[(?<when>[^\]]+)\]";
-		public static readonly Regex reWhen = new Regex("^"+fWhen, RegexOptions.Compiled);
-		public static readonly Regex reLogFilename = new Regex(@".*[\\/](?<network>[^-\\/]+)-(?<channel>#[^-\\/]+)-(?<year>\d+)-(?<month>\d+)-(?<day>\d+)\.log",RegexOptions.Compiled);
-		public static readonly Regex reWho = new Regex(@"(?<nick>[^*;! ]+)!(?<user>[^@ ]+)@(?<host>[^&> ]+)", RegexOptions.Compiled);
-		public static readonly Regex reUrlProtocol = new Regex("^"+fUrlProtocol,RegexOptions.Compiled);
-		public static readonly Regex reUrlPatterns = new Regex(@"\b(?:" + fUrlProtocol + "|"  + fUrlTLD + "|"  + fUrlBLD + ")", RegexOptions.Compiled);
-
-		const string fUrlContinue = "(?:[^.,;:!?')\"\\s]|(\\S(?=\\S|$)))";
-		const string fUrlProtocol = @"([-.+a-zA-Z0-9]+?:\/\/"+fUrlContinue+"+)";
-		const string fUrlTLD      = @"([^\s]+?\.(?:com|net|org|edu|gov|mil|info|biz)"+fUrlContinue+"*)";
-		const string fUrlBLD      = @"((?:www|ftp)\."+fUrlContinue+"+)";
+		public static bool AutoAllow { get { return !Platform.IsOnUnix && File.Exists( Paths.AutoAllowTxt ); } }
 
 		static string GuessAndPrependProtocol( string url ) {
-			Match m = reUrlProtocol.Match(url);
+			Match m = Regexps.UrlProtocol.Match(url);
 			if ( m.Success ) return url;
 			else if ( url.StartsWith("www.") ) return "http://"+url;
 			else if ( url.StartsWith("ftp.") ) return "ftp://"+url;
@@ -54,7 +28,7 @@ namespace LoggingMonkey {
 		}
 
 		public static string HtmlizeUrls( string text, bool cats ) {
-			return reUrlPatterns.Replace( text, m => {
+			return Regexps.UrlPatterns.Replace( text, m => {
 				var url=GuessAndPrependProtocol(m.Value);
 
 				if ( cats && url.StartsWith("http://zao.se/~zao/cats/") ) return "<img src=\""+url+"\" alt=\"cats\">";
@@ -75,7 +49,7 @@ namespace LoggingMonkey {
 			var procstart = DateTime.Now;
 			Console.WriteLine( "=== Process start at {0} ===", procstart );
 
-			var logpattern = LogsDirectory+"{network}-{channel}-{year}-{month}-{day}.log";
+			var logpattern = Paths.LogsDirectory+"{network}-{channel}-{year}-{month}-{day}.log";
 #if DEBUG
 			var channels = new[] { "#sparta" };
 			var whitelistChannels = new[] { "#sparta" };
@@ -105,9 +79,9 @@ namespace LoggingMonkey {
 
 			Console.Write("Getting directory list...");
 			var files = Directory
-				.GetFiles(LogsDirectory, "*.log", SearchOption.TopDirectoryOnly )
+				.GetFiles(Paths.LogsDirectory, "*.log", SearchOption.TopDirectoryOnly )
 				.OrderBy( file => {
-					var m = reLogFilename.Match(file);
+					var m = Regexps.LogFilename.Match(file);
 					return new DateTime
 						( int.Parse(m.Groups["year"].Value)
 						, int.Parse(m.Groups["month"].Value)

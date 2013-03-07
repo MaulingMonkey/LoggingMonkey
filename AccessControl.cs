@@ -19,22 +19,22 @@ namespace LoggingMonkey
 		static readonly RSACryptoServiceProvider  RSA  = new RSACryptoServiceProvider();
 		static readonly SHA1CryptoServiceProvider Hash = new SHA1CryptoServiceProvider();
 
-		static readonly FileLineList mBlacklist		= new FileLineList(Program.BlacklistPath);
-		static readonly FileLineList mPendinglist	= new FileLineList(Program.PendingPath);
-		static readonly FileLineList mWhitelist		= new FileLineList(Program.WhitelistPath);
+		static readonly FileLineList mBlacklist		= new FileLineList(Paths.BlacklistTxt);
+		static readonly FileLineList mPendinglist	= new FileLineList(Paths.PendingTxt);
+		static readonly FileLineList mWhitelist		= new FileLineList(Paths.WhitelistTxt);
 
 		//static readonly 
 		static AccessControl()
 		{
-			if( !File.Exists(Program.RsaKey) )
+			if( !File.Exists(Paths.RsaKey) )
 			{
 				// save out newly generated key
-				File.WriteAllBytes(Program.RsaKey,RSA.ExportCspBlob(true));
+				File.WriteAllBytes(Paths.RsaKey,RSA.ExportCspBlob(true));
 			}
 			else
 			{
 				// load in existing key
-				RSA.ImportCspBlob(File.ReadAllBytes(Program.RsaKey));
+				RSA.ImportCspBlob(File.ReadAllBytes(Paths.RsaKey));
 			}
 		}
 
