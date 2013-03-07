@@ -84,6 +84,39 @@ namespace LoggingMonkey {
 				case "/":
 					break; // we'll handle this normally
 				case "/auth":
+					HandleAuthRequest( context, ref acs );
+					break;
+				case "/robots.txt":
+					HandleRobotsRequest( context );
+					return; // EARLY BAIL
+				case "/04b_03__.ttf":
+					HandleFontRequest( context );
+					return; // EARLY BAIL
+				case "/backup.zip":
+					HandleBackupRequest( context, acs );
+					return; // EARLY BAIL
+				default:
+					HandleInvalidPageRequest( context );
+					return; // EARLY BAIL
+				}
+
+				// handle normally:
+				HandleLogsRequest( context, acs, logs );
+#if !DEBUG
+			} catch ( Exception e ) {
+				if ( Program.IsOnUnix ) {
+					File.AppendAllText( Program.ExceptionsPath, e.ToString() );
+				} else if( Debugger.IsAttached ) {
+					Debugger.Break();
+				}
+#endif
+			} finally {
+				context.Response.Close();
+			}
+		}
+
+				private static void HandleAuthRequest( HttpListenerContext context, ref AccessControlStatus acs )
+				{
 					var m = reAuthQuery.Match( context.Request.Url.Query ?? "" );
 					if( m.Success && m.Groups["token"].Success )
 					{
@@ -92,8 +125,10 @@ namespace LoggingMonkey {
 						context.Response.Headers.Add("Set-Cookie", string.Format("{0}={1};Path=/;Expires={2} GMT",Program.AuthCookieName,token,expiration));
 						acs = AccessControl.GetStatus(token);
 					}
-					break;
-				case "/robots.txt":
+				}
+
+				private static void HandleRobotsRequest( HttpListenerContext context )
+				{
 					context.Response.ContentEncoding = Encoding.UTF8;
 					context.Response.ContentType = "text/plain";
 					using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) ) {
@@ -102,13 +137,17 @@ namespace LoggingMonkey {
 							+ "Disallow: /\n"
 							);
 					}
-					return; // EARLY BAIL
-				case "/04b_03__.ttf":
-					var font = Assets.ResourceManager.GetObject("_04B_03__") as byte[];
-					context.Response.OutputStream.Write(font,0,font.Length);
-					return; // EARLY BAIL
-				case "/backup.zip":
-					if( !Allow(acs) )
+				}
+
+				private static void HandleFontRequest( HttpListenerContext context )
+				{
+					var font = Assets.ResourceManager.GetObject( "_04B_03__" ) as byte[];
+					context.Response.OutputStream.Write( font, 0, font.Length );
+				}
+
+				private void HandleBackupRequest( HttpListenerContext context, AccessControlStatus acs )
+				{
+					if( !Allow( acs ) )
 					{
 						context.Response.StatusCode = 401;
 						context.Response.ContentEncoding = Encoding.UTF8;
@@ -159,7 +198,10 @@ namespace LoggingMonkey {
 						zip.CopyTo(context.Response.OutputStream);
 					}
 					return; // EARLY BAIL
-				default:
+				}
+
+				private static void HandleInvalidPageRequest( HttpListenerContext context )
+				{
 					context.Response.StatusCode = 404;
 					context.Response.ContentEncoding = Encoding.UTF8;
 					context.Response.ContentType = "text/html";
@@ -173,10 +215,10 @@ namespace LoggingMonkey {
 							+  "</body></html>\n"
 							);
 					}
-					return; // EARLY BAIL
 				}
 
-				// handle normally:
+			private void HandleLogsRequest( HttpListenerContext context, AccessControlStatus acs, AllLogs logs )
+			{
 				var vars = context.Request.QueryString;
 				DateTime from, to;
 				int linesOfContext;
@@ -195,7 +237,6 @@ namespace LoggingMonkey {
 				string querytype  = vars["querytype"] ?? "plaintext";
 				string timefmt    = vars["timefmt"]   ?? "pst";
 
-				
 
 
 				Func<string,bool> bools = s => new[]{"true","1"}.Contains((vars[s]??"").ToLowerInvariant());
@@ -465,17 +506,5 @@ namespace LoggingMonkey {
 					writer.WriteLine("	<script type='text/javascript'> $(document).ready(function() { $('a[title]').tooltip(); });</script>");
 					writer.WriteLine("</body></html>");
 				}
-#if !DEBUG
-			} catch ( Exception e ) {
-				if ( Program.IsOnUnix ) {
-					File.AppendAllText( Program.ExceptionsPath, e.ToString() );
-				} else if( Debugger.IsAttached ) {
-					Debugger.Break();
-				}
-#endif
-			} finally {
-				context.Response.Close();
-			}
-		}
 	}
 }
