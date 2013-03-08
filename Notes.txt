@@ -1,0 +1,7 @@
+Roadmap:
+	- Implement admin whitelist
+	- Implement admin commands (!refresh-lamers) for debug
+	- Implement lamers page + refresh butan
+	- Implement lamers filtering
+	- Implement lamers autorefresh
+	- Implement whitelist/blacklist display

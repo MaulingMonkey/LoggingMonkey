@@ -104,8 +104,8 @@ namespace LoggingMonkey {
 				HandleLogsRequest( context, acs, logs );
 #if !DEBUG
 			} catch ( Exception e ) {
-				if ( Program.IsOnUnix ) {
-					File.AppendAllText( Program.ExceptionsPath, e.ToString() );
+				if ( Platform.IsOnUnix ) {
+					File.AppendAllText( Paths.ExceptionsTxt, e.ToString() );
 				} else if( Debugger.IsAttached ) {
 					Debugger.Break();
 				}
