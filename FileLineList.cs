@@ -31,23 +31,23 @@ namespace LoggingMonkey
 			}
 		}
 
-        public void RemoveLines(string line)
-        {
-            lock (Lock)
-            try
-            {
-                var lines = File.ReadAllLines(Path).Where(x => x != line).ToList();
+		public void RemoveLines(string line)
+		{
+			lock (Lock)
+			try
+			{
+				var lines = File.ReadAllLines(Path).Where(x => x != line).ToList();
 
-                using (var writer = new StreamWriter(Path, false, Encoding.UTF8))
-                {
-                    lines.ForEach(writer.WriteLine);
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+				using (var writer = new StreamWriter(Path, false, Encoding.UTF8))
+				{
+					lines.ForEach(writer.WriteLine);
+				}
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+		}
 
 		public IEnumerator<string> GetEnumerator()
 		{
