@@ -73,14 +73,15 @@
     </Compile>
     <Compile Include="CachedWebFile.cs" />
     <Compile Include="ChannelLogs.cs" />
+    <Compile Include="Reactors\CompoundIrcMessageReactor.cs" />
     <Compile Include="DnsCache.cs" />
     <Compile Include="FastLogReader.cs" />
     <Compile Include="FileLineList.cs" />
     <Compile Include="HttpLogServer.cs" />
-    <Compile Include="IIrcMessageReactor.cs" />
-    <Compile Include="IrcMessageRegexReactor.cs" />
-    <Compile Include="IrcMessageLoggerReactor.cs" />
-    <Compile Include="IrcMessageReactor.cs" />
+    <Compile Include="Reactors\IIrcMessageReactor.cs" />
+    <Compile Include="Reactors\IrcMessageRegexReactor.cs" />
+    <Compile Include="Reactors\IrcMessageLoggerReactor.cs" />
+    <Compile Include="Reactors\IrcMessageReactor.cs" />
     <Compile Include="Network.cs" />
     <Compile Include="NetworkLogs.cs" />
     <Compile Include="Parallel.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Regexps.cs" />
+    <Compile Include="Reactors\X3MessageServices.cs" />
     <Compile Include="_ Extension Methods.cs" />
   </ItemGroup>
   <ItemGroup>

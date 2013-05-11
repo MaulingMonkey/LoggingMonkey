@@ -56,12 +56,11 @@ namespace LoggingMonkey {
 		{
 			switch( acs )
 			{
-			case AccessControlStatus.Error:
-				return Program.AutoAllow;
-			case AccessControlStatus.Blacklisted:
-				return false;
-			default:
-				return true;
+			case AccessControlStatus.Error:			return Program.AutoAllow;
+			case AccessControlStatus.Blacklisted:	return false;
+			case AccessControlStatus.Pending:		return Program.AutoAllow;
+			case AccessControlStatus.Whitelisted:	return true;
+			default:								return false;
 			}
 		}
 

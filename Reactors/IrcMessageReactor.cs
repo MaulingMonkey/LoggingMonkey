@@ -5,19 +5,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 
 namespace LoggingMonkey {
-	class IrcMessageReactor : List<IIrcMessageReactor> , IIrcMessageReactor {
-		public bool TryReact( Network network, string message ) {
-			return this.Any( siml => siml.TryReact(network,message) );
-		}
-
-		public void Add( string regex, string response ) {
-			Add( new IrcMessageLoggerReactor(regex,response) );
-		}
-
-		public void Add( string regex, Action<Network,Match> match ) {
-			Add( new IrcMessageRegexReactor(regex,match) );
-		}
-
+	class IrcMessageReactor : CompoundIrcMessageReactor {
 		static readonly Random RNG = new Random();
 
 		static readonly Regex reTag = new Regex(@"<.+?>",RegexOptions.Compiled);
