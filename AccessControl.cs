@@ -19,9 +19,10 @@ namespace LoggingMonkey
 		static readonly RSACryptoServiceProvider  RSA  = new RSACryptoServiceProvider();
 		static readonly SHA1CryptoServiceProvider Hash = new SHA1CryptoServiceProvider();
 
-		static readonly FileLineList mBlacklist		= new FileLineList(Paths.BlacklistTxt);
-		static readonly FileLineList mPendinglist	= new FileLineList(Paths.PendingTxt);
-		static readonly FileLineList mWhitelist		= new FileLineList(Paths.WhitelistTxt);
+	    static readonly FileLineList mAdminlist     = new FileLineList(Paths.AdminTxt);
+        static readonly FileLineList mBlacklist     = new FileLineList(Paths.BlacklistTxt);
+        static readonly FileLineList mPendinglist   = new FileLineList(Paths.PendingTxt);
+        static readonly FileLineList mWhitelist     = new FileLineList(Paths.WhitelistTxt);
 
 		//static readonly 
 		static AccessControl()
@@ -62,11 +63,72 @@ namespace LoggingMonkey
 				mBlacklist.AppendLine(id);
 		}
 
+        public static void Blacklist(string invokerId, string id)
+        {
+            if (!mAdminlist.Contains(invokerId))
+            {
+                Console.WriteLine("{0} attempted to !blacklist {1}, was not found in adminlist.", invokerId, id);
+                return;
+            }
+
+            if (mBlacklist.Contains(id))
+            {
+                Console.WriteLine("{0} called !blacklist on blacklisted target {1}", invokerId, id);
+                return;
+            }
+
+            if (mPendinglist.Contains(id))
+            {
+                mPendinglist.RemoveLines(id);
+            }
+
+            if (mWhitelist.Contains(id))
+            {
+                mWhitelist.RemoveLines(id);
+            }
+
+            Blacklist(id);
+            Console.WriteLine("{0} !blacklisted {1}", invokerId, id);
+        }
+
 		public static void Whitelist( string id )
 		{
 			if( !mWhitelist.Contains(id) )
 				mWhitelist.AppendLine(id);
 		}
+
+        public static void Whitelist( string invokerId, string id )
+        {
+            if (!mAdminlist.Contains(invokerId))
+            {
+                Console.WriteLine("{0} attempted to !whitelist {1}, was not found in adminlist.", invokerId, id);
+                return;
+            }
+
+            if (mWhitelist.Contains(id))
+            {
+                Console.WriteLine("{0} called !whitelist on a whitelisted target {1}", invokerId, id);
+                return;
+            }
+
+            if (mBlacklist.Contains(id))
+            {
+                Console.WriteLine("{0} called !whitelist on a blacklisted target {1}. Removing target from blacklist.", invokerId, id);
+                mBlacklist.RemoveLines(id);
+            }
+
+            if (!mPendinglist.Contains(id))
+            {
+                Console.WriteLine("{0} called !whitelist on non-pending target {1}", invokerId, id);
+            }
+            else
+            {
+                mPendinglist.RemoveLines(id);
+            }
+
+            Console.WriteLine("{0} added {1} to whitelist", invokerId, id);
+            Whitelist(id);
+        }
 
 		public static string Decode( string data )
 		{
