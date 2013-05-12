@@ -19,10 +19,10 @@ namespace LoggingMonkey
 		static readonly RSACryptoServiceProvider  RSA  = new RSACryptoServiceProvider();
 		static readonly SHA1CryptoServiceProvider Hash = new SHA1CryptoServiceProvider();
 
-	    static readonly FileLineList mAdminlist     = new FileLineList(Paths.AdminTxt);
-        static readonly FileLineList mBlacklist     = new FileLineList(Paths.BlacklistTxt);
-        static readonly FileLineList mPendinglist   = new FileLineList(Paths.PendingTxt);
-        static readonly FileLineList mWhitelist     = new FileLineList(Paths.WhitelistTxt);
+		static readonly FileLineList mAdminlist     = new FileLineList(Paths.AdminTxt);
+		static readonly FileLineList mBlacklist     = new FileLineList(Paths.BlacklistTxt);
+		static readonly FileLineList mPendinglist   = new FileLineList(Paths.PendingTxt);
+		static readonly FileLineList mWhitelist     = new FileLineList(Paths.WhitelistTxt);
 
 		//static readonly 
 		static AccessControl()
