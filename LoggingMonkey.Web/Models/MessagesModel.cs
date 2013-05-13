@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Linq;
+
 namespace LoggingMonkey.Web.Models
 {
     public class Message
@@ -23,7 +25,9 @@ namespace LoggingMonkey.Web.Models
         }
 
         public string ChannelName { get; set; }
+
         public decimal TimeElapsed { get; set; }
+
         public List<Message> Messages { get; set; }
 
         public bool IsEmpty
@@ -32,6 +36,11 @@ namespace LoggingMonkey.Web.Models
             {
                 return Messages.Count == 0;
             }
+        }
+
+        public IEnumerable<string> ActiveNicks
+        {
+            get { return Messages.Select(x => x.Nick).Distinct(); }
         }
     }
 }
