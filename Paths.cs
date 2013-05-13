@@ -9,6 +9,7 @@ namespace LoggingMonkey
 		public static readonly string ExceptionsTxt  = Platform.IsOnUnix ? @"/home/loggingmonkey/exceptions.txt"  : null;
 		public static readonly string RsaKey         = Platform.IsOnUnix ? @"/home/loggingmonkey/key.dsa"      : @"I:\home\configs\lm-key.dsa";
 
+		public static readonly string AdminTxt       = Platform.IsOnUnix ? @"/home/loggingmonkey/admin.txt"     : @"I:\home\configs\lm-admin.txt";
 		public static readonly string BlacklistTxt   = Platform.IsOnUnix ? @"/home/loggingmonkey/blacklist.txt" : @"I:\home\configs\lm-blacklist.txt";
 		public static readonly string PendingTxt     = Platform.IsOnUnix ? @"/home/loggingmonkey/pending.txt"   : @"I:\home\configs\lm-pending.txt";
 		public static readonly string WhitelistTxt   = Platform.IsOnUnix ? @"/home/loggingmonkey/whitelist.txt" : @"I:\home\configs\lm-whitelist.txt";

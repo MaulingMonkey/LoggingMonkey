@@ -52,6 +52,18 @@ namespace LoggingMonkey {
 					Console.WriteLine("{0} used !auth, responded with token {1}",who,token);
 				} catch ( Exception ) {}
 			}}
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!whitelist (?<user>[^ ]+)$", (network, m) => {
+				var invoker = m.Groups["who"].Value;
+				var target = m.Groups["user"].Value;
+
+				AccessControl.Whitelist(invoker, target);
+			}}
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!blacklist (?<user>[^ ]+)$", (network, m) => {
+				var invoker = m.Groups["who"].Value;
+				var target = m.Groups["user"].Value;
+
+				AccessControl.Blacklist(invoker, target);
+			}}
 			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channels>[^ ]+) \:?(?<message>.+)$"                , "[{when}] <{who}> {message}" }
 			, { @"^\:(?<who>[^ ]+) JOIN (?<channels>[^ ]+)$"                                     , "[{when}] -->| {who} has joined {channel}" }
 			, { @"^\:(?<who>[^ ]+) PART (?<channels>[^ ]+) ?\:?(?<message>.*)$"                  , "[{when}] |<-- {who} has left {channel} ({message})" }
