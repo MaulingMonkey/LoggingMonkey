@@ -15,7 +15,7 @@ namespace LoggingMonkey.Web
 
 			routes.MapRoute(
 				name: "Default",
-				url: "{controller}/{action}/{id}",
+				url: "{action}/{id}",
 				defaults: new { controller = "Main", action = "Index", id = UrlParameter.Optional }
 			);
 		}
