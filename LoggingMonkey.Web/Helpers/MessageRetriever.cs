@@ -74,6 +74,25 @@ namespace LoggingMonkey.Web.Helpers
                         model.Messages.Add(msg);
                         break;
 
+
+                    case FastLogReader.LineType.Action:
+                        msg.Type = line.Type;
+                        msg.Nick = line.Nick;
+                        msg.Timestamp = line.When;
+                        msg.Lines.Add(line.Message);
+
+                        model.Messages.Add(msg);
+                        break;
+
+                    case FastLogReader.LineType.Meta:
+                        msg.Type = line.Type;
+                        msg.Nick = line.Nick;
+                        msg.Timestamp = line.When;
+                        msg.Lines.Add(line.Message);
+
+                        model.Messages.Add(msg);
+                        break;
+
                     case FastLogReader.LineType.Join:
                         msg.Type = line.Type;
                         msg.Nick = line.Nick;

@@ -185,6 +185,8 @@
     <Content Include="Views\Main\MessageTypes\Join.cshtml" />
     <Content Include="Views\Main\MessageTypes\Quit.cshtml" />
     <Content Include="Views\Main\Denied.cshtml" />
+    <Content Include="Views\Main\MessageTypes\Meta.cshtml" />
+    <Content Include="Views\Main\MessageTypes\Action.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LoggingMonkey.csproj">

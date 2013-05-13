@@ -1,4 +1,4 @@
-﻿var LoggingMonkey = (function (params) {
+﻿var LoggingMonkey = function (params) {
 
     var nickColors = [
         "blue",
@@ -17,11 +17,11 @@
     ];
 
     var authorColors = [];
-    
-    $.each($('.said-by span'), function (index, span) {
+
+    $.each($('.said-by span'), function(index, span) {
         var $span = $(span);
         var author = $span.text();
-        
+
         if (!authorColors[author]) {
             authorColors[author] = nickColors[index % nickColors.length];
         }
@@ -29,7 +29,7 @@
         $span.css({ "color": authorColors[author] });
     });
 
-    $('#showOptions').click(function (e) {
+    $('#showOptions').click(function(e) {
         e.preventDefault();
 
         var $chev = $(this).find('i');
@@ -49,11 +49,11 @@
         }
     });
 
-    String.prototype.splice = function (idx, rem, s) {
+    String.prototype.splice = function(idx, rem, s) {
         return (this.slice(0, idx) + s + this.slice(idx + Math.abs(rem)));
     };
 
-    var thumbnailer = function (text, href) {
+    var thumbnailer = function(text, href) {
         if (!href) {
             return text;
         }
@@ -64,26 +64,25 @@
         var query = uri.getQuery();
 
         switch (hostname) {
-            case "i.imgur.com":
-                var extIndex = text.indexOf(".png");
+        case "i.imgur.com":
+            var extIndex = text.indexOf(".png");
 
-                if (extIndex > -1) {
-                    text = '<img src="' + text.splice(extIndex, 0, "s") + '"/>';
-                }
+            if (extIndex > -1) {
+                text = '<img src="' + text.splice(extIndex, 0, "s") + '"/>';
+            }
 
-                break;
+            break;
+        case "www.youtube.com":
+            var v = query.split('=')[1];
 
-            case "www.youtube.com":
-                var v = query.split('=')[1];
-
-                return '<iframe width="320" height="240" src="http://www.youtube.com/embed/' + v + '" frameborder="0" allowfullscreen></iframe>';
+            return '<iframe width="320" height="240" src="http://www.youtube.com/embed/' + v + '" frameborder="0" allowfullscreen></iframe>';
         }
 
         return '<a href="' + href + '" target="_blank" title="' + href + '">' + text + '</a>';
     };
 
-    $.each($('.log-entry').find('p'), function (index, entry) {
+    $.each($('.log-entry').find('p'), function(index, entry) {
         var text = linkify($(entry).text(), { callback: thumbnailer });
         $(entry).html(text);
     });
-}());
+};
