@@ -1,0 +1,17 @@
+﻿@model LoggingMonkey.Web.Models.Message
+
+<div class="log-entry clearfix">
+    <div class="date">@Model.Timestamp.ToString("M/d h:mm tt")</div>
+    <div class="said-by"><span style="font-weight: bold;">@Model.Nick</span></div>
+    <div class="message">
+        @for (var i = 0; i < Model.Lines.Count; i++)
+        {
+            <p>@Model.Lines[i]</p>
+            
+            if (i != Model.Lines.Count - 1)
+            {
+                <hr />
+            }
+        }
+    </div>
+</div>

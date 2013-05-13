@@ -1,0 +1,49 @@
+﻿@using LoggingMonkey.Web.Helpers
+
+@model LoggingMonkey.Web.Models.IndexViewModel
+
+@{
+    ViewBag.Title = "LoggingMonkey";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section scripts
+{
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/ba-linkify.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/main.js"></script>
+}
+
+<article>
+    <h1>LoggingMonkey</h1>
+
+    @Html.Partial("_SearchForm", Model.Search)
+
+    <div id="displayOptions">
+        <hr style="border-top: 1px dashed #eee; border-bottom: 0; border-left: 0; margin-top: 20px;" />
+        <h3>Display Options</h3>
+        @Html.Partial("_DisplayOptionsForm", Model.DisplayOptions)
+        <hr style="margin-top: 20px; border-top: 1px dashed #eee; border-bottom: 0; border-left: 0;" />
+    </div>
+
+    <h2>Recently said in #gamedev</h2>
+
+    <div class="entries clearfix">
+        @foreach (var message in Model.Messages.Messages)
+        {
+            @Html.RenderMessage(message)
+        }
+    </div>
+</article>
+
+<footer>
+    <p>
+    Contact <b>MaulingMonkey</b> in #gamedev on AfterNET
+    <br/>
+    <span class="big-label">
+        Connect with <a href="http://www.gamedev.net/community/chat/">java web client</a> or <a href="irc://irc.afternet.org/gamedev">launch desktop client</a>
+    </span>
+    <br/>
+    <a href="#">GitHub</a> | <a href="#"><i class="icon-keyboard"></i></a> | UI by <b>Jovan</b>
+    </p>
+</footer>

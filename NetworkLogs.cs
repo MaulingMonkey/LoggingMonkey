@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace LoggingMonkey {
-	class NetworkLogs : IDisposable {
+	public class NetworkLogs : IDisposable {
 		string Network, FileNamePattern;
 
 		readonly Dictionary<string,ChannelLogs> _Channels = new Dictionary<string,ChannelLogs>();

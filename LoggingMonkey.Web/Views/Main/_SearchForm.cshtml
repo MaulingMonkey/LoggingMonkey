@@ -1,0 +1,60 @@
+﻿@model LoggingMonkey.Web.Models.SearchModel
+
+@using (Html.BeginForm("Index", "Main", FormMethod.Get, new { id = "homeForm" }))
+{
+	@Html.TextBoxFor(x => x.Nickname, new { placeholder = "nick", autofocus = true })
+	<span class="madlib-label">said</span>
+	@Html.TextBoxFor(x => x.Message, new { placeholder = "message" })
+	<span class="madlib-label">in</span>
+	<select>
+		<option>#gamedev</option>
+		<option>#graphicschat</option>
+		<option>#graphicsdev</option>
+	</select>
+	
+	<button type="submit">Search</button>
+	
+	<p class="right"><a href="#" id="showOptions"><i class="icon-chevron-sign-right"></i> More Options</a></p>
+	
+	<div id="advancedSearch" class="clearfix">
+		<h3 style="margin-top: 0;">Advanced Search Options</h3>
+
+		<section>
+			<div class="controls">
+				@Html.LabelFor(x => x.Username)
+				@Html.TextBoxFor(x => x.Username)
+			</div>
+			<div  class="controls">
+				@Html.LabelFor(x => x.Hostname)
+				@Html.TextBoxFor(x => x.Hostname)
+			</div>
+		</section>
+
+		<section>
+			<div class="controls">
+				@Html.LabelFor(x => x.FromDate)
+				@Html.EditorFor(x => x.FromDate)
+				<i style="position: relative; left: -25px; top: -1px;" class="icon-calendar"></i>
+			</div>
+			<div class="controls">
+				@Html.LabelFor(x => x.ToDate)
+				@Html.EditorFor(x => x.ToDate)
+				<i style="position: relative; left: -25px; top: -1px;" class="icon-calendar"></i>
+			</div>
+		</section>
+		  
+		<section id="matchCaseOptions">
+			<div class="controls">
+				<label>Match using</label>
+					<select>
+					<option>Plain Text</option>
+					<option>Wildcard</option>
+					<option>Regex</option>
+				</select>
+			</div>
+			<div id="caseSensitiveOption" class="controls">
+				<label><input type="checkbox" /> Case Sensitive</label>
+			</div>
+		</section>
+	</div>
+}
