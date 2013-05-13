@@ -18,13 +18,42 @@
             $chev.addClass('icon-chevron-sign-down');
         }
     });
+    
+    String.prototype.splice = function (idx, rem, s) {
+        return (this.slice(0, idx) + s + this.slice(idx + Math.abs(rem)));
+    };
 
-    var blank_target_link = function (text, href) {
-        return href ? '<a href="' + href + '" target="_blank" title="' + href + '">' + text + '</a>' : text;
+    var thumbnailer = function (text, href) {
+        if (!href) {
+            return text;
+        }
+
+        var uri = new URI(href);
+        var hostname = uri.getAuthority();
+        var path = uri.getPath();
+        var query = uri.getQuery();
+        
+        switch (hostname) {
+            case "i.imgur.com":                
+                var extIndex = text.indexOf(".png");
+                
+                if (extIndex > -1) {
+                    text = '<img src="' + text.splice(extIndex, 0, "s") + '"/>';
+                }
+
+                break;
+                
+            case "www.youtube.com":
+                var v = query.split('=')[1];
+
+                return '<iframe width="320" height="240" src="http://www.youtube.com/embed/' + v + '" frameborder="0" allowfullscreen></iframe>';
+        }
+
+        return '<a href="' + href + '" target="_blank" title="' + href + '">' + text + '</a>';
     };
 
     $.each($('.log-entry').find('p'), function (index, entry) {
-        var text = linkify($(entry).text(), { callback: blank_target_link });
+        var text = linkify($(entry).text(), { callback: thumbnailer });
         $(entry).html(text);
     });
 });
