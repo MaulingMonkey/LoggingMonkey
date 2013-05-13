@@ -214,7 +214,7 @@ header h1 {
 	margin: 0;
 }
 
-.notice {
+.notice, .action-entry, .meta-entry {
 	padding: 5px;
 	text-align: center;
 	color: #555;
@@ -299,3 +299,10 @@ html[xmlns] .clearfix {
 	top: 2px;
 }
 
+.meta-entry {
+    background-color: #f8f8ff;
+}
+
+.action-entry {
+    background-color: #f0f8ff;
+}

@@ -14,9 +14,11 @@
     <script type="text/javascript" src="~/Scripts/URI.js"></script>
     <script type="text/javascript" src="~/Scripts/main.js"></script>
     
-    $(document).ready(function () {
-        LoggingMonkey(@Html.Raw(Json.Encode(Model.Messages.ActiveNicks)));
-    });
+    <script type="text/javascript">
+        $(document).ready(function () {
+            LoggingMonkey(@Html.Raw(Json.Encode(Model.Messages.ActiveNicks)));
+        });
+    </script>
 }
 
 <article>
