@@ -1,4 +1,34 @@
-﻿$(document).ready(function () {
+﻿var LoggingMonkey = (function (params) {
+
+    var nickColors = [
+        "blue",
+        "red",
+        "green",
+        "teal",
+        "orange",
+        "purple",
+        "navyblue",
+        "crimson",
+        "darkred",
+        "darkgreen",
+        "darkslategray",
+        "darkslateblue",
+        "lightcoral"
+    ];
+
+    var authorColors = [];
+    
+    $.each($('.said-by span'), function (index, span) {
+        var $span = $(span);
+        var author = $span.text();
+        
+        if (!authorColors[author]) {
+            authorColors[author] = nickColors[index % nickColors.length];
+        }
+
+        $span.css({ "color": authorColors[author] });
+    });
+
     $('#showOptions').click(function (e) {
         e.preventDefault();
 
@@ -18,7 +48,7 @@
             $chev.addClass('icon-chevron-sign-down');
         }
     });
-    
+
     String.prototype.splice = function (idx, rem, s) {
         return (this.slice(0, idx) + s + this.slice(idx + Math.abs(rem)));
     };
@@ -32,17 +62,17 @@
         var hostname = uri.getAuthority();
         var path = uri.getPath();
         var query = uri.getQuery();
-        
+
         switch (hostname) {
-            case "i.imgur.com":                
+            case "i.imgur.com":
                 var extIndex = text.indexOf(".png");
-                
+
                 if (extIndex > -1) {
                     text = '<img src="' + text.splice(extIndex, 0, "s") + '"/>';
                 }
 
                 break;
-                
+
             case "www.youtube.com":
                 var v = query.split('=')[1];
 
@@ -56,4 +86,4 @@
         var text = linkify($(entry).text(), { callback: thumbnailer });
         $(entry).html(text);
     });
-});
+}());
