@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace LoggingMonkey {
-	static class Program {
+	public static class Program {
 
 #if DEBUG
 		public static readonly string PrimaryPrefix = "http://logs2.pandamojo.com" + (Platform.IsOnUnix?":8080":"") + "/";

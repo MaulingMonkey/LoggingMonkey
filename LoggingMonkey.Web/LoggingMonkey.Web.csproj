@@ -130,6 +130,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\WhitelistedAttribute.cs" />
+    <Compile Include="Helpers\Cookie2AccessControlStatus.cs" />
     <Compile Include="Helpers\HtmlMessageHelper.cs" />
     <Compile Include="Helpers\MessageRetriever.cs" />
     <Compile Include="Models\DisplayOptionsModel.cs" />
@@ -186,6 +188,7 @@
     <Content Include="Views\Main\MessageTypes\Message.cshtml" />
     <Content Include="Views\Main\MessageTypes\Join.cshtml" />
     <Content Include="Views\Main\MessageTypes\Quit.cshtml" />
+    <Content Include="Views\Main\Denied.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LoggingMonkey.csproj">
