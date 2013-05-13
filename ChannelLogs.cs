@@ -8,14 +8,14 @@ using System.Text;
 using System.Globalization;
 
 namespace LoggingMonkey {
-	static class ExtensionMethods {
+	public static class ExtensionMethods {
 		public static string MustReplace( this string value, string what, string with ) {
 			Debug.Assert( value.Contains(what) );
 			return value.Replace(what,with);
 		}
 	}
 
-	class ChannelLogs : IDisposable {
+	public class ChannelLogs : IDisposable {
 		public bool RequireAuth = false;
 
 		string Network, Channel, FileNamePattern;

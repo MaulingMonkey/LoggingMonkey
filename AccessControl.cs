@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LoggingMonkey
 {
-	enum AccessControlStatus
+	public enum AccessControlStatus
 	{
 		Whitelisted,
 		Blacklisted,
@@ -14,7 +14,7 @@ namespace LoggingMonkey
 		Error,
 	}
 
-	static class AccessControl
+	public static class AccessControl
 	{
 		static readonly RSACryptoServiceProvider  RSA  = new RSACryptoServiceProvider();
 		static readonly SHA1CryptoServiceProvider Hash = new SHA1CryptoServiceProvider();
