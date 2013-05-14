@@ -1,19 +1,13 @@
-﻿@model LoggingMonkey.Web.Models.DisplayOptionsModel
+﻿@using LoggingMonkey.Web.Helpers
+@model LoggingMonkey.Web.Models.DisplayOptionsModel
 
 @using (Html.BeginForm("UpdateDisplayOptions", "Main"))
 {
     <label style="margin-left: 22px; margin-right: 15px;">Date Format</label>
-    <select>
-    <option>M/D H:MM [AM,PM] (PST)</option>
-    <option>M/D/YY H:MM:SS [AM,PM] (PST)</option>
-    <option>M/D/YY H:MM:SS (24h) (UTC)</option>
-    </select>
+    @Html.DropDownListFor(x => x.DateFormatType, Html.DateFormatTypesList())
 
     <label style="margin-left: 22px; margin-right: 15px;">Theme</label>
-    <select>
-    <option>Light</option>
-    <option>Dark</option>
-    </select>
+    @Html.DropDownListFor(x => x.ThemeName, Html.ThemesList())
 
-    <button>Save</button>
+    <button type="submit">Save</button>
 }

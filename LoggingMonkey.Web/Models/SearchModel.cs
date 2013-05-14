@@ -16,11 +16,9 @@ namespace LoggingMonkey.Web.Models
         public string Message { get; set; }
         public int ChannelId { get; set; }
 
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         [Display(Name = "From")]
         public DateTime? FromDate { get; set; }
 
-        [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:dd/MM/yyyy}")]
         [Display(Name = "To")]
         public DateTime? ToDate { get; set; }
 
