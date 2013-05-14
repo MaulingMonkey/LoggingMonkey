@@ -144,9 +144,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\css\dark.css" />
-    <Content Include="Content\css\font-awesome-ie7.css" />
-    <Content Include="Content\css\font-awesome-ie7.min.css" />
-    <Content Include="Content\css\font-awesome.css" />
     <Content Include="Content\css\font-awesome.min.css" />
     <Content Include="Content\css\jquery-ui-timepicker-addon.css" />
     <Content Include="Content\css\main.css" />
@@ -156,9 +153,7 @@
     <Content Include="Global.asax" />
     <Content Include="Scripts\ba-linkify.min.js" />
     <Content Include="Scripts\jquery-ui-timepicker-addon.js" />
-    <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
-    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\main.js" />
     <Content Include="Scripts\URI.js" />
