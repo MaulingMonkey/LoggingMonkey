@@ -30,12 +30,12 @@
 		<section>
 			<div class="controls">
 				@Html.LabelFor(x => x.FromDate)
-				@Html.TextBoxFor(x => x.FromDate, new { @Value = Html.GetDateFromDisplayOptions(Model.FromDate)})
+				@Html.TextBoxFor(x => x.FromDate, new {@class = "datetimepicker", @Value = Html.GetDateFromDisplayOptions(Model.FromDate)})
 				<i style="position: relative; left: -25px; top: -1px;" class="icon-calendar"></i>
 			</div>
 			<div class="controls">
 				@Html.LabelFor(x => x.ToDate)
-				@Html.TextBoxFor(x => x.ToDate, new { @Value = Html.GetDateFromDisplayOptions(Model.ToDate)})
+				@Html.TextBoxFor(x => x.ToDate, new {@class = "datetimepicker", @Value = Html.GetDateFromDisplayOptions(Model.ToDate)})
 				<i style="position: relative; left: -25px; top: -1px;" class="icon-calendar"></i>
 			</div>
 		</section>

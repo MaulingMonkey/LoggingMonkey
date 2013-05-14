@@ -18,7 +18,7 @@
     
     <script type="text/javascript">
         $(document).ready(function () {
-            LoggingMonkey(@Html.Raw(Json.Encode(Model.Messages.ActiveNicks)));
+            LoggingMonkey(@Html.Raw(Json.Encode(Model.DisplayOptions.DateFormatType)));
         });
     </script>
 }

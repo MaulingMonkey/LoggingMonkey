@@ -1,4 +1,4 @@
-﻿var LoggingMonkey = function (params) {
+﻿var LoggingMonkey = function (dateFormatType) {
 
     var nickColors = [
         "blue",
@@ -85,4 +85,22 @@
         var text = linkify($(entry).text(), { callback: thumbnailer });
         $(entry).html(text);
     });
+
+    var dtformat = {};
+
+    switch (dateFormatType) {
+        case 0:
+            dtformat = { dateFormat: 'm/d', timeFormat: 'h:mm tt' };
+            break;
+            
+        case 1:
+            dtformat = { dateFormat: 'm/d/yy', timeFormat: 'h:mm:ss tt' };
+            break;
+            
+        case 2:
+            dtformat = { dateFormat: 'm/d/yy', timeFormat: 'H:mm:ss' };
+            break;
+    }
+
+    $('.datetimepicker').datetimepicker(dtformat);
 };
