@@ -13,34 +13,27 @@ namespace LoggingMonkey.Web.Helpers
                 return String.Empty;
             }
 
-            var format = helper.ViewBag.DateFormat;
-            var tz = helper.ViewBag.DateTimeZone;
+            var options = DisplayOptionsModel.FromHttpContext(helper.ViewContext.HttpContext);
 
-            // Cache in viewbag
-            if (format == null)
+            var format = "M/d h:mm tt";
+            var tz = TimeZoneInfo.Utc;
+
+            switch (options.DateFormatType)
             {
-                var options = DisplayOptionsModel.FromHttpContext(helper.ViewContext.HttpContext);
+                case DateFormatTypes.MinutesOnlyPst:
+                    format = "M/d h:mm tt";
+                    tz = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+                    break;
 
-                switch (options.DateFormatType)
-                {
-                    case DateFormatTypes.MinutesOnlyPst:
-                        format = "M/d h:mm tt";
-                        tz = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-                        break;
+                case DateFormatTypes.MeridiemPst:
+                    format = "M/d/yy hh:mm:ss tt";
+                    tz = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+                    break;
 
-                    case DateFormatTypes.MeridiemPst:
-                        format = "M/d/yy hh:mm:ss tt";
-                        tz = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
-                        break;
-
-                    case DateFormatTypes.TwentyFourHourUtc:
-                        format = "M/d/yy HH:mm:ss";
-                        tz = TimeZoneInfo.Utc;
-                        break;
-                }
-
-                helper.ViewBag.DateFormat = format;
-                helper.ViewBag.DateTimeZone = tz;
+                case DateFormatTypes.TwentyFourHourUtc:
+                    format = "M/d/yy HH:mm:ss";
+                    tz = TimeZoneInfo.Utc;
+                    break;
             }
 
             return TimeZoneInfo.ConvertTimeFromUtc(date.Value.ToUniversalTime(), tz).ToString(format, Program.Culture);

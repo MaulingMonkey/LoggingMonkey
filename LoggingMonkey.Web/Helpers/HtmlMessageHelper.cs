@@ -30,7 +30,7 @@ namespace LoggingMonkey.Web.Helpers
                     return helper.Partial("messageTypes/Action", message);
 
                 default:
-                    throw new NotImplementedException("Implement a view to render this type of message.");
+                    goto case FastLogReader.LineType.Meta;
             }
         }
     }
