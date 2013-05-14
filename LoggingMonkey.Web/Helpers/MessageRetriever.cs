@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.Text.RegularExpressions;
 using LoggingMonkey.Web.Models;
 
 namespace LoggingMonkey.Web.Helpers
@@ -12,26 +11,50 @@ namespace LoggingMonkey.Web.Helpers
         {
             var output = new MessagesModel();
 
-            var logpattern = Paths.LogsDirectory + "{network}-{channel}-{year}-{month}-{day}.log";
-            var logs = new AllLogs() { { "irc.afternet.org", new NetworkLogs("irc.afternet.org", logpattern) } };
-            var afternet = logs["irc.afternet.org"];
+            var channelName = search.ChannelId == 0 ? ChannelHelper.GetById(1) : ChannelHelper.GetById(search.ChannelId);
+            var networkName = "irc.afternet.org";
 
-            var channels = new[] { "#sparta" };
-            var whitelistChannels = new[] { "#sparta" };
+            search.FromDate = search.FromDate ?? DateTime.Now.AddMinutes(-15);
+            search.ToDate   = search.ToDate   ?? DateTime.Now.AddMinutes(15);
 
-            foreach (var ch in channels) afternet.Channel(ch);
-            foreach (var ch in whitelistChannels) afternet.Channel(ch).RequireAuth = true;
-            afternet.Channel("#gamedev");
+            var lines = FastLogReader.ReadAllLines(networkName, channelName, search.FromDate.Value, search.ToDate.Value);
 
-            var lines = FastLogReader.ReadAllLines("irc.afternet.org", "#gamedev", DateTime.Now.AddMinutes(-15), DateTime.Now.AddMinutes(15));
-
-            //
-            // Organize by date, then group by nearest minute, by name and by type.
-            //
-
-            Process(output, lines);
+            Process(output, Filter(lines, search));
 
             return output;
+        }
+        private static IEnumerable<FastLogReader.Line> Filter(IEnumerable<FastLogReader.Line> lines, SearchModel search)
+        {
+            var regexOptions = RegexOptions.Compiled | (search.IsCaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+
+            Func<string, Regex> buildStringMatcherFor = input =>
+            {
+                if (String.IsNullOrEmpty(input)) return null;
+                switch (search.MatchType)
+                {
+                    case MatchTypes.PlainText: return new Regex(Regex.Escape(input), regexOptions);
+                    case MatchTypes.Wildcard: return new Regex("^" + Regex.Escape(input).Replace(@"\*", "(.*)").Replace(@"\?", ".") + "$", regexOptions);
+                    case MatchTypes.Regex: return new Regex(input, regexOptions);
+                    default: goto case MatchTypes.PlainText;
+                }
+            };
+
+            var nickMatcher = buildStringMatcherFor(search.Nickname);
+            var userMatcher = buildStringMatcherFor(search.Username);
+            var hostMatcher = buildStringMatcherFor(search.Hostname);
+            var msgMatcher  = buildStringMatcherFor(search.Message);
+
+            foreach (var line in lines)
+            {
+                if (line.When < search.FromDate || line.When > search.ToDate) continue;
+
+                if (nickMatcher != null && !nickMatcher.IsMatch(line.Nick   ?? String.Empty))   continue;
+                if (userMatcher != null && !userMatcher.IsMatch(line.User   ?? String.Empty))   continue;
+                if (hostMatcher != null && !hostMatcher.IsMatch(line.Host   ?? String.Empty))   continue;
+                if (msgMatcher  != null && !msgMatcher.IsMatch(line.Message ?? String.Empty))   continue;
+
+                yield return line;
+            }
         }
 
         private static void Process(MessagesModel model, IEnumerable<FastLogReader.Line> lines)
@@ -63,60 +86,12 @@ namespace LoggingMonkey.Web.Helpers
                 prevNick = line.Nick;
                 prevType = line.Type;
 
-                switch (line.Type)
-                {
-                    case FastLogReader.LineType.Message:
-                        msg.Type = line.Type;
-                        msg.Nick = line.Nick;
-                        msg.Timestamp = line.When;
-                        msg.Lines.Add(line.Message);
+                msg.Type = line.Type;
+                msg.Nick = line.Nick;
+                msg.Timestamp = line.When;
+                msg.Lines.Add(line.Message);
 
-                        model.Messages.Add(msg);
-                        break;
-
-
-                    case FastLogReader.LineType.Action:
-                        msg.Type = line.Type;
-                        msg.Nick = line.Nick;
-                        msg.Timestamp = line.When;
-                        msg.Lines.Add(line.Message);
-
-                        model.Messages.Add(msg);
-                        break;
-
-                    case FastLogReader.LineType.Meta:
-                        msg.Type = line.Type;
-                        msg.Nick = line.Nick;
-                        msg.Timestamp = line.When;
-                        msg.Lines.Add(line.Message);
-
-                        model.Messages.Add(msg);
-                        break;
-
-                    case FastLogReader.LineType.Join:
-                        msg.Type = line.Type;
-                        msg.Nick = line.Nick;
-                        msg.Timestamp = line.When;
-
-                        model.Messages.Add(msg);
-                        break;
-
-                    case FastLogReader.LineType.Quit:
-                        msg.Type = line.Type;
-                        msg.Nick = line.Nick;
-                        msg.Timestamp = line.When;
-
-                        model.Messages.Add(msg);
-                        break;
-
-                    case FastLogReader.LineType.Part:
-                        msg.Type = FastLogReader.LineType.Quit;
-                        msg.Nick = line.Nick;
-                        msg.Timestamp = line.When;
-
-                        model.Messages.Add(msg);
-                        break;
-                }
+                model.Messages.Add(msg);
             }
         }
     }

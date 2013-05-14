@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using LoggingMonkey.Web.Helpers;
 
 namespace LoggingMonkey.Web.Models
 {
@@ -23,7 +24,7 @@ namespace LoggingMonkey.Web.Models
         [Display(Name = "To")]
         public DateTime? ToDate { get; set; }
 
-        public int MatchTypeId { get; set; }
+        public MatchTypes MatchType { get; set; }
         public bool IsCaseSensitive { get; set; }
 	}
 }

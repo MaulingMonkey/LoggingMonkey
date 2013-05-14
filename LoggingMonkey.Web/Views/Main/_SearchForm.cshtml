@@ -1,16 +1,13 @@
 ﻿@model LoggingMonkey.Web.Models.SearchModel
+@using LoggingMonkey.Web.Helpers
 
 @using (Html.BeginForm("Index", "Main", FormMethod.Get, new { id = "homeForm" }))
 {
 	@Html.TextBoxFor(x => x.Nickname, new { placeholder = "nick", autofocus = true })
 	<span class="madlib-label">said</span>
 	@Html.TextBoxFor(x => x.Message, new { placeholder = "message" })
-	<span class="madlib-label">in</span>
-	<select>
-		<option>#gamedev</option>
-		<option>#graphicschat</option>
-		<option>#graphicsdev</option>
-	</select>
+    <span class="madlib-label">in</span>
+    @Html.DropDownListFor(x => x.ChannelId, Html.ChannelsList())
 	
 	<button type="submit">Search</button>
 	
@@ -46,11 +43,7 @@
 		<section id="matchCaseOptions">
 			<div class="controls">
 				<label>Match using</label>
-					<select>
-					<option>Plain Text</option>
-					<option>Wildcard</option>
-					<option>Regex</option>
-				</select>
+			    @Html.DropDownListFor(x => x.MatchType, Html.MatchTypesList())
 			</div>
 			<div id="caseSensitiveOption" class="controls">
 				<label><input type="checkbox" /> Case Sensitive</label>
