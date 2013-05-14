@@ -35,7 +35,7 @@ namespace LoggingMonkey.Web.Helpers
 
                     case DateFormatTypes.TwentyFourHourUtc:
                         format = "M/d/yy HH:mm:ss";
-                        tz = TimeZoneInfo.FindSystemTimeZoneById("Coordinated Universal Time");
+                        tz = TimeZoneInfo.Utc;
                         break;
                 }
 
