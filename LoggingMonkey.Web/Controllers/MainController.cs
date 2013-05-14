@@ -1,4 +1,8 @@
 ﻿using System;
+using System.IO;
+using System.IO.Packaging;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Http;
@@ -30,10 +34,60 @@ namespace LoggingMonkey.Web.Controllers
         }
 
         [HttpGet]
+        [Whitelisted]
+        public ActionResult Backup()
+        {
+            Stream zip;
+
+            try
+            {
+                zip = System.IO.File.Open(Paths.BackupZip, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.ServiceUnavailable);
+            }
+
+            using (zip)
+            {
+                using (var package = Package.Open(zip, FileMode.Create))
+                {
+                    var files = Directory.GetFiles(Paths.LogsDirectory, "*.log", SearchOption.TopDirectoryOnly);
+
+                    foreach (var file in files)
+                    {
+                        var relFile = Uri.EscapeDataString(Path.GetFileName(file));
+                        var uri = PackUriHelper.CreatePartUri(new Uri(relFile, UriKind.Relative));
+                        var part = package.CreatePart(uri, System.Net.Mime.MediaTypeNames.Text.Plain,
+                                                      CompressionOption.Maximum);
+                        
+                        using (var fstream = System.IO.File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        {
+                            using (var partstream = part.GetStream())
+                            {
+                                fstream.CopyTo(partstream);
+                            }
+                        }
+
+                        package.Flush();
+                    }
+
+                    package.Close();
+                }
+
+                zip.Flush();
+                zip.Position = 0;
+
+                var name = String.Format("LoggingMonkey Backup {0}.zip", DateTime.Now.ToString("M-d-yy h.mm tt"));
+
+                return new FilePathResult(Paths.BackupZip, "applicaton/zip") {FileDownloadName = name};
+            }
+        }
+
+        [HttpGet]
         public ActionResult Auth(string token)
         {
-            var cookie = new HttpCookie(Program.AuthCookieName, token);
-            cookie.Expires = DateTime.Now.AddYears(10);
+            var cookie = new HttpCookie(Program.AuthCookieName, token) {Expires = DateTime.Now.AddYears(10)};
 
             Response.Cookies.Add(cookie);
 

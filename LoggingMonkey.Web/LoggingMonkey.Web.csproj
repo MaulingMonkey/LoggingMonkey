@@ -116,6 +116,7 @@
       <Private>True</Private>
       <HintPath>..\packages\WebGrease.1.1.0\lib\WebGrease.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -126,6 +127,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\ChannelHelper.cs" />
+    <Compile Include="Helpers\HtmlListHelpers.cs" />
+    <Compile Include="Helpers\MatchTypes.cs" />
     <Compile Include="Helpers\WhitelistedAttribute.cs" />
     <Compile Include="Helpers\Cookie2AccessControlStatus.cs" />
     <Compile Include="Helpers\HtmlMessageHelper.cs" />
