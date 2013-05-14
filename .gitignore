@@ -2,3 +2,6 @@
 *.user
 obj/
 bin/
+packages/
+UpgradeLog.*
+_UpgradeReport_Files/
