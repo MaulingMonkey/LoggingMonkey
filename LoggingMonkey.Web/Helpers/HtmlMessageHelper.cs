@@ -10,7 +10,12 @@ namespace LoggingMonkey.Web.Helpers
 {
     public static class HtmlMessageHelper
     {
-        public static MvcHtmlString RenderMessage(this HtmlHelper<LoggingMonkey.Web.Models.IndexViewModel> helper, Message message)
+        public static MvcHtmlString RenderHeading(this HtmlHelper helper, SearchModel search)
+        {
+            return new MvcHtmlString("<h2>Scouring through " + ChannelHelper.GetById(search.ChannelId) + "...</h2>");
+        }
+
+        public static MvcHtmlString RenderMessage(this HtmlHelper<IndexViewModel> helper, Message message)
         {
             switch (message.Type)
             {

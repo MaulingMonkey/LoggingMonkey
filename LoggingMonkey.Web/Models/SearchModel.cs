@@ -6,9 +6,6 @@ namespace LoggingMonkey.Web.Models
 {
 	public class SearchModel
 	{
-		public static readonly int DefaultChannelId;
-		public static readonly int DefaultMatchTypeId;
-
         public string Nickname { get; set; }
         public string Username { get; set; }
         public string Hostname { get; set; }
@@ -24,5 +21,14 @@ namespace LoggingMonkey.Web.Models
 
         public MatchTypes MatchType { get; set; }
         public bool IsCaseSensitive { get; set; }
+
+	    public bool IsAdvancedSearch
+	    {
+            get
+            {
+                return !String.IsNullOrWhiteSpace(Username) || !String.IsNullOrWhiteSpace(Hostname) || FromDate.HasValue ||
+                       ToDate.HasValue || MatchType != MatchTypes.PlainText || IsCaseSensitive;
+            }
+	    }
 	}
 }

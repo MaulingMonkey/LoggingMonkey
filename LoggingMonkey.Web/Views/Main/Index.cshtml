@@ -17,8 +17,14 @@
     <script type="text/javascript" src="~/Scripts/main.js"></script>
     
     <script type="text/javascript">
-        $(document).ready(function () {
+        $(document).ready(function() {
             LoggingMonkey(@Html.Raw(Json.Encode(Model.DisplayOptions.DateFormatType)));
+
+            if ("@Model.Search.IsAdvancedSearch" === "True") {
+                setTimeout(function() {
+                    $('#showOptions').click();
+                }, 800);
+            }
         });
     </script>
 }
@@ -34,15 +40,22 @@
         @Html.Partial("_DisplayOptionsForm", Model.DisplayOptions)
         <hr style="margin-top: 20px; border-top: 1px dashed #eee; border-bottom: 0; border-left: 0;" />
     </div>
+    
+    @if (Model.Messages.IsEmpty)
+    {
+        <p>There don't seem to be any messages....</p>
+    }
+    else
+    {
+        @Html.RenderHeading(Model.Search)
 
-    <h2>Recently said in #gamedev</h2>
-
-    <div class="entries clearfix">
-        @foreach (var message in Model.Messages.Messages)
-        {
-            @Html.RenderMessage(message)
-        }
-    </div>
+        <div class="entries clearfix">
+            @foreach (var message in Model.Messages.Messages)
+            {
+                @Html.RenderMessage(message)
+            }
+        </div>
+    }
 </article>
 
 <footer>
