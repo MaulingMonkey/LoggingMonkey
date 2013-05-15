@@ -14,12 +14,18 @@ namespace LoggingMonkey.Web.Helpers
             var channelName = search.ChannelId == 0 ? ChannelHelper.GetById(1) : ChannelHelper.GetById(search.ChannelId);
             var networkName = "irc.afternet.org";
 
+            var prevFromDate = search.FromDate;
+            var prevToDate = search.ToDate;
+
             search.FromDate = search.FromDate ?? DateTime.Now.AddMinutes(-15);
             search.ToDate   = search.ToDate   ?? DateTime.Now.AddMinutes(15);
 
             var lines = FastLogReader.ReadAllLines(networkName, channelName, search.FromDate.Value, search.ToDate.Value);
 
             Process(output, Filter(lines, search));
+
+            search.FromDate = prevFromDate;
+            search.ToDate = prevToDate;
 
             return output;
         }

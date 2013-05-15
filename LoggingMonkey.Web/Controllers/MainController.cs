@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Http;
@@ -16,12 +16,34 @@ namespace LoggingMonkey.Web.Controllers
 
     public class MainController : Controller
     {
+        private DateTime? ConvertQueryValueToDate(string qs)
+        {
+            var dateString = Request.QueryString[qs];
+
+            if (dateString == null)
+            {
+                return null;
+            }
+
+            DateTime date;
+
+            var successful = DateTime.TryParse(dateString, out date) ||
+                             DateTime.TryParseExact(dateString, "M/d h:mm tt", null, DateTimeStyles.None, out date);
+
+            return successful ? date : (DateTime?)null;
+        }
+
         [HttpGet]
         [Whitelisted]
         public ActionResult Index([FromUri] SearchModel model)
         {
+            var displayOptions = DisplayOptionsModel.FromHttpContext(HttpContext);
+
+            model.FromDate = ConvertQueryValueToDate("FromDate");
+            model.ToDate   = ConvertQueryValueToDate("ToDate");
+
             var messages = MessageRetriever.Get(model);
-            var vm       = new IndexViewModel { Search = model, Messages = messages };
+            var vm       = new IndexViewModel { Search = model, DisplayOptions = displayOptions, Messages = messages };
 
             return View(vm);
         }
@@ -30,7 +52,10 @@ namespace LoggingMonkey.Web.Controllers
         [Whitelisted]
         public ActionResult UpdateDisplayOptions(DisplayOptionsModel model)
         {
-            throw new NotImplementedException();
+            var cookie = new HttpCookie("LoggingMonkeyDisplay", DisplayOptionsModel.ToJson(model));
+            Response.Cookies.Set(cookie);
+
+            return Request.UrlReferrer != null ? (ActionResult)Redirect(Request.UrlReferrer.AbsoluteUri) : RedirectToAction("Index");
         }
 
         [HttpGet]
