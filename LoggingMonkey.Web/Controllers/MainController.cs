@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Net;
@@ -15,11 +16,31 @@ namespace LoggingMonkey.Web.Controllers
 
     public class MainController : Controller
     {
+        private DateTime? ConvertQueryValueToDate(string qs)
+        {
+            var dateString = Request.QueryString[qs];
+
+            if (dateString == null)
+            {
+                return null;
+            }
+
+            DateTime date;
+
+            var successful = DateTime.TryParse(dateString, out date) ||
+                             DateTime.TryParseExact(dateString, "M/d h:mm tt", null, DateTimeStyles.None, out date);
+
+            return successful ? date : (DateTime?)null;
+        }
+
         [HttpGet]
         [Whitelisted]
         public ActionResult Index([FromUri] SearchModel model)
         {
             var displayOptions = DisplayOptionsModel.FromHttpContext(HttpContext);
+
+            model.FromDate = ConvertQueryValueToDate("FromDate");
+            model.ToDate   = ConvertQueryValueToDate("ToDate");
 
             var messages = MessageRetriever.Get(model);
             var vm       = new IndexViewModel { Search = model, DisplayOptions = displayOptions, Messages = messages };
@@ -32,10 +53,9 @@ namespace LoggingMonkey.Web.Controllers
         public ActionResult UpdateDisplayOptions(DisplayOptionsModel model)
         {
             var cookie = new HttpCookie("LoggingMonkeyDisplay", DisplayOptionsModel.ToJson(model));
-
             Response.Cookies.Set(cookie);
 
-            return Redirect(Request.UrlReferrer.AbsoluteUri);
+            return Request.UrlReferrer != null ? (ActionResult)Redirect(Request.UrlReferrer.AbsoluteUri) : RedirectToAction("Index");
         }
 
         [HttpGet]
