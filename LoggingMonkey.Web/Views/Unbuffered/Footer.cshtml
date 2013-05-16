@@ -1,0 +1,34 @@
+﻿@model LoggingMonkey.Web.Models.IndexViewModel
+
+
+    <footer>
+        <p>
+        Contact <b>MaulingMonkey</b> in #gamedev on AfterNET
+        <br/>
+        <span class="big-label">
+            Connect with <a href="http://www.gamedev.net/community/chat/">java web client</a> or <a href="irc://irc.afternet.org/gamedev">launch desktop client</a>
+        </span>
+        <br/>
+        <a href="#">GitHub</a> | <a href="#"><i class="icon-keyboard"></i></a> | UI by <b>Jovan</b>
+        </p>
+    </footer>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/ba-linkify.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/URI.js"></script>
+    <script type="text/javascript" src="~/Scripts/jquery-ui-timepicker-addon.js"></script>
+    <script type="text/javascript" src="~/Scripts/main.js"></script>
+    
+    <script type="text/javascript">
+        $(document).ready(function() {
+            LoggingMonkey(@Html.Raw(Json.Encode(Model.DisplayOptions.DateFormatType)));
+
+            if ("@Model.Search.IsAdvancedSearch" === "True") {
+                setTimeout(function() {
+                    $('#showOptions').click();
+                }, 800);
+            }
+        });
+    </script>
+</body>
+</html>

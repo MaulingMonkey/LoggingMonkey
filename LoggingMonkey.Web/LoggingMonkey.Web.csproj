@@ -15,7 +15,7 @@
     <AssemblyName>LoggingMonkey.Web</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -132,6 +132,7 @@
     <Compile Include="Helpers\HtmlDateHelper.cs" />
     <Compile Include="Helpers\HtmlListHelpers.cs" />
     <Compile Include="Helpers\MatchTypes.cs" />
+    <Compile Include="Helpers\UnbufferedRenderer.cs" />
     <Compile Include="Helpers\WhitelistedAttribute.cs" />
     <Compile Include="Helpers\Cookie2AccessControlStatus.cs" />
     <Compile Include="Helpers\HtmlMessageHelper.cs" />
@@ -147,6 +148,7 @@
     <Content Include="Content\css\font-awesome.min.css" />
     <Content Include="Content\css\jquery-ui-timepicker-addon.css" />
     <Content Include="Content\css\main.css" />
+    <Content Include="Content\css\normalize.css" />
     <Content Include="Content\font\fontawesome-webfont.svg" />
     <Content Include="Content\img\escheresque_ste.png" />
     <Content Include="Content\img\satinweave.png" />
@@ -190,6 +192,17 @@
     <Content Include="Views\Main\Denied.cshtml" />
     <Content Include="Views\Main\MessageTypes\Meta.cshtml" />
     <Content Include="Views\Main\MessageTypes\Action.cshtml" />
+    <Content Include="Views\Unbuffered\Header.cshtml" />
+    <Content Include="Views\Unbuffered\PreMessages.cshtml" />
+    <Content Include="Views\Unbuffered\PostMessages.cshtml" />
+    <Content Include="Views\Unbuffered\Footer.cshtml" />
+    <Content Include="Views\Unbuffered\_SearchForm.cshtml" />
+    <Content Include="Views\Unbuffered\_DisplayOptionsForm.cshtml" />
+    <Content Include="Views\Unbuffered\MessageTypes\Action.cshtml" />
+    <Content Include="Views\Unbuffered\MessageTypes\Join.cshtml" />
+    <Content Include="Views\Unbuffered\MessageTypes\Message.cshtml" />
+    <Content Include="Views\Unbuffered\MessageTypes\Meta.cshtml" />
+    <Content Include="Views\Unbuffered\MessageTypes\Quit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LoggingMonkey.csproj">
@@ -211,12 +224,11 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>False</UseIIS>
+          <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>60835</DevelopmentServerPort>
+          <DevelopmentServerPort>64915</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>
-          </IISUrl>
+          <IISUrl>http://localhost:64915/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
