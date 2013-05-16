@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Net;
+using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Http;
@@ -16,6 +17,23 @@ namespace LoggingMonkey.Web.Controllers
 
     public class MainController : Controller
     {
+        protected string RenderPartialViewToString(string viewName, object model)
+        {
+            if (string.IsNullOrEmpty(viewName))
+                viewName = ControllerContext.RouteData.GetRequiredString("action");
+
+            ViewData.Model = model;
+
+            using (StringWriter sw = new StringWriter())
+            {
+                ViewEngineResult viewResult = ViewEngines.Engines.FindPartialView(ControllerContext, viewName);
+                ViewContext viewContext = new ViewContext(ControllerContext, viewResult.View, ViewData, TempData, sw);
+                viewResult.View.Render(viewContext, sw);
+
+                return sw.GetStringBuilder().ToString();
+            }
+        }
+
         private DateTime? ConvertQueryValueToDate(string qs)
         {
             var dateString = Request.QueryString[qs];
@@ -34,9 +52,12 @@ namespace LoggingMonkey.Web.Controllers
         }
 
         [HttpGet]
-        [Whitelisted]
-        public ActionResult Index([FromUri] SearchModel model)
+        //[Whitelisted]
+        public void Index([FromUri] SearchModel model)
         {
+            Response.Buffer = false;
+            Response.BufferOutput = false;
+
             var displayOptions = DisplayOptionsModel.FromHttpContext(HttpContext);
 
             model.FromDate = ConvertQueryValueToDate("FromDate");
@@ -45,7 +66,7 @@ namespace LoggingMonkey.Web.Controllers
             var messages = MessageRetriever.Get(model);
             var vm       = new IndexViewModel { Search = model, DisplayOptions = displayOptions, Messages = messages };
 
-            return View(vm);
+            UnbufferedRenderer.Render(ControllerContext, ViewData, TempData, Response, vm);
         }
 
         [HttpPost]

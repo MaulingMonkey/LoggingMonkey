@@ -1,4 +1,5 @@
-﻿@using LoggingMonkey.Web.Helpers
+﻿@using System.Threading
+@using LoggingMonkey.Web.Helpers
 
 @model LoggingMonkey.Web.Models.IndexViewModel
 
@@ -41,6 +42,12 @@
         <hr style="margin-top: 20px; border-top: 1px dashed #eee; border-bottom: 0; border-left: 0;" />
     </div>
     
+    @{
+        Response.Flush();
+        Response.OutputStream.Flush();
+    }
+
+    
     @if (Model.Messages.IsEmpty)
     {
         <p>There don't seem to be any messages....</p>
@@ -50,9 +57,16 @@
         @Html.RenderHeading(Model.Search)
 
         <div class="entries clearfix">
-            @foreach (var message in Model.Messages.Messages)
+            @for (var i = 0; i < Model.Messages.Messages.Count; i++)
             {
-                @Html.RenderMessage(message)
+                @Html.RenderMessage(Model.Messages.Messages[i])
+                
+                if (i % 100 == 0)
+                {
+                    Response.Flush();
+                    Response.OutputStream.Flush();
+                    Thread.Sleep(5000);
+                }
             }
         </div>
     }

@@ -6,6 +6,11 @@ namespace LoggingMonkey.Web.Models
 {
 	public class SearchModel
 	{
+        public SearchModel()
+        {
+            ChannelId = 1;
+        }
+
         public string Nickname { get; set; }
         public string Username { get; set; }
         public string Hostname { get; set; }

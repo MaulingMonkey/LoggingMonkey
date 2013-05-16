@@ -1,0 +1,13 @@
+﻿@using LoggingMonkey.Web.Helpers
+@model LoggingMonkey.Web.Models.DisplayOptionsModel
+
+@using (Html.BeginForm("UpdateDisplayOptions", "Main"))
+{
+    <label style="margin-left: 22px; margin-right: 15px;">Date Format</label>
+    @Html.DropDownListFor(x => x.DateFormatType, Html.DateFormatTypesList())
+
+    <label style="margin-left: 22px; margin-right: 15px;">Theme</label>
+    @Html.DropDownListFor(x => x.ThemeName, Html.ThemesList())
+
+    <button type="submit">Save</button>
+}

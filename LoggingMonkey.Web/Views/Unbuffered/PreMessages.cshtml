@@ -1,0 +1,18 @@
+﻿@using LoggingMonkey.Web.Helpers
+@model LoggingMonkey.Web.Models.IndexViewModel
+
+<article>
+    <h1><a href="/" title="Back to the jungle">LoggingMonkey</a></h1>
+
+    @Html.Partial("_SearchForm", Model.Search)
+
+    <div id="displayOptions">
+        <hr style="border-top: 1px dashed #eee; border-bottom: 0; border-left: 0; margin-top: 20px;" />
+        <h3>Display Options</h3>
+        @Html.Partial("_DisplayOptionsForm", Model.DisplayOptions)
+        <hr style="margin-top: 20px; border-top: 1px dashed #eee; border-bottom: 0; border-left: 0;" />
+    </div>
+    
+    @Html.RenderHeading(Model.Search)
+
+    <div class="entries clearfix">
