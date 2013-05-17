@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using LoggingMonkey.Web.Models;
 
@@ -7,6 +9,8 @@ namespace LoggingMonkey.Web.Helpers
 {
     public static class MessageRetriever
     {
+        private static readonly CachedHashedWebCsvFile Tor = new CachedHashedWebCsvFile (Path.Combine(Path.GetTempPath(), "tor.csv"), @"http://torstatus.blutmagie.de/ip_list_all.php/Tor_ip_list_ALL.csv");
+
         public static MessagesModel Get(SearchModel search)
         {
             var output = new MessagesModel();
@@ -76,9 +80,16 @@ namespace LoggingMonkey.Web.Helpers
 
             foreach (var line in lines)
             {
+                var isTor = Tor.Lines.Contains(line.Host) || DnsCache.ResolveDontWait(line.Host).Any(ipv4 => Tor.Lines.Contains(ipv4));
+
                 if (msg == null)
                 {
                     msg = new Message { Timestamp = line.When, Nick = line.Nick, Type = line.Type };
+
+                    if (isTor)
+                    {
+                        msg.UsesTor = true;
+                    }
                 }
 
                 if (prevNick != null && line.Nick == prevNick && line.Type == prevType)
@@ -91,6 +102,11 @@ namespace LoggingMonkey.Web.Helpers
 
                 prevNick = line.Nick;
                 prevType = line.Type;
+
+                if (isTor)
+                {
+                    msg.UsesTor = true;
+                }
 
                 msg.Type = line.Type;
                 msg.Nick = line.Nick;

@@ -11,6 +11,7 @@ namespace LoggingMonkey.Web.Models
             Lines = new List<string>();
         }
 
+        public bool UsesTor { get; set; }
         public DateTime Timestamp { get; set; }
         public string Nick;
         public FastLogReader.LineType Type;

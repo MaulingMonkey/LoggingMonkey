@@ -4,7 +4,7 @@ using System.IO;
 using System.Net;
 
 namespace LoggingMonkey {
-	abstract class CachedWebFile {
+    public abstract class CachedWebFile {
 		public readonly string LocalPath;
 		public readonly string RemotePath;
 		public TimeSpan CacheAtLeast = TimeSpan.FromDays(1), Timeout = TimeSpan.FromMinutes(10);
@@ -49,7 +49,7 @@ namespace LoggingMonkey {
 		private readonly WebClient WebClient = new WebClient();
 	}
 
-	class CachedHashedWebCsvFile : CachedWebFile {
+    public class CachedHashedWebCsvFile : CachedWebFile {
 		HashSet<string> _Lines = new HashSet<string>();
 		public HashSet<string> Lines { get { return _Lines; }}
 

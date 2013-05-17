@@ -8,7 +8,7 @@ using System.Threading;
 using System.Globalization;
 
 namespace LoggingMonkey {
-	static class DnsCache {
+    public static class DnsCache {
 		static readonly Dictionary<string,string[]> HostToIpv4 = new Dictionary<string,string[]>();
 		static readonly AutoResetEvent ARE = new AutoResetEvent(false);
 
