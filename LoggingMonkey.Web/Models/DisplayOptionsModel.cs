@@ -11,6 +11,10 @@ namespace LoggingMonkey.Web.Models
 
         public string ThemeName { get; set; }
 
+        public bool UseTinyFont { get; set; }
+
+        public bool ShowCats { get; set; }
+
         public static DisplayOptionsModel FromHttpContext(HttpContextBase context)
         {
             return context.Request.Cookies["LoggingMonkeyDisplay"] != null

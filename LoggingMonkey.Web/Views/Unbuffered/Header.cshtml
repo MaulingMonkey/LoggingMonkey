@@ -15,5 +15,33 @@
         <link href="~/Content/css/font-awesome.min.css" rel="stylesheet" type="text/css">
         <link href="~/Content/css/jquery-ui-timepicker-addon.css" rel="stylesheet" type="text/css">
         <link href="~/Content/css/main.css" rel="stylesheet" type="text/css">
+        
+        @if (Model.DisplayOptions.UseTinyFont)
+        {
+            <style>
+                @@font-face {
+                    font-family: "04b03";
+                    src: url("/Content/font/04B_03__.TTF") format("truetype");
+                }
+		        * {
+		            font-family: "04b03";
+                    font-size: 8px;
+		        }
+                h1 a {
+                    font-family: 'Pacifico' !important;
+                    font-size: 12px !important;
+                }
+                input, select {
+                    font-size: 10px !important;
+                }
+                #caseSensitiveOption {
+                    margin-top: -10px;
+                    margin-left: 20px;
+                }
+                .said-by {
+                    padding-right: 0;
+                }
+            </style>
+        }
     </head>
     <body>

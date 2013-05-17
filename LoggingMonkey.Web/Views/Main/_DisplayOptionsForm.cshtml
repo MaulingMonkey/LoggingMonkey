@@ -1,13 +1,16 @@
 ﻿@using LoggingMonkey.Web.Helpers
 @model LoggingMonkey.Web.Models.DisplayOptionsModel
 
-@using (Html.BeginForm("UpdateDisplayOptions", "Main"))
+@using (Html.BeginForm("UpdateDisplayOptions", "Main", FormMethod.Post, new {id = "formDisplayOptions"}))
 {
-    <label style="margin-left: 22px; margin-right: 15px;">Date Format</label>
-    @Html.DropDownListFor(x => x.DateFormatType, Html.DateFormatTypesList())
-
     <label style="margin-left: 22px; margin-right: 15px;">Theme</label>
     @Html.DropDownListFor(x => x.ThemeName, Html.ThemesList())
 
+    <label style="margin-left: 22px; margin-right: 15px;">Date Format</label>
+    @Html.DropDownListFor(x => x.DateFormatType, Html.DateFormatTypesList())
+
+	<label style="margin-left: 22px; margin-right: 5px;">@Html.CheckBoxFor(x => x.UseTinyFont) Use Tiny Font</label>
+    <label style="margin-left: 22px; margin-right: 5px;">@Html.CheckBoxFor(x => x.ShowCats) Cats</label>
+    
     <button type="submit">Save</button>
 }
