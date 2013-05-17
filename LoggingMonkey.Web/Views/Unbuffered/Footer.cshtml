@@ -21,7 +21,7 @@
     
     <script type="text/javascript">
         $(document).ready(function() {
-            LoggingMonkey(@Html.Raw(Json.Encode(Model.DisplayOptions.DateFormatType)));
+            LoggingMonkey(@Html.Raw(Json.Encode(Model.DisplayOptions)));
 
             if ("@Model.Search.IsAdvancedSearch" === "True") {
                 setTimeout(function() {
