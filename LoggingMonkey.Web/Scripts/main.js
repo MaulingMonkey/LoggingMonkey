@@ -63,8 +63,6 @@
         var path = uri.getPath();
         var query = uri.getQuery();
 
-        console.log(href);
-
         switch (hostname) {
         case "zao.se":
             if (displayOptions.ShowCats && path.indexOf("/cats") > -1) {
