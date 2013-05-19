@@ -1,4 +1,4 @@
-﻿var LoggingMonkey = function (dateFormatType) {
+﻿var LoggingMonkey = function (displayOptions) {
 
     var nickColors = [
         "blue",
@@ -64,6 +64,11 @@
         var query = uri.getQuery();
 
         switch (hostname) {
+        case "zao.se":
+            if (displayOptions.ShowCats && path.indexOf("/cats") > -1) {
+                text = '<img src="' + href + '"/>';
+            }
+            break;
         case "i.imgur.com":
             var extIndex = text.indexOf(".png");
 
@@ -88,7 +93,7 @@
 
     var dtformat = {};
 
-    switch (dateFormatType) {
+    switch (displayOptions.DateFormatType) {
         case 0:
             dtformat = { dateFormat: 'm/d', timeFormat: 'h:mm tt' };
             break;

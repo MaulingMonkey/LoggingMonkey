@@ -159,7 +159,9 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\main.js" />
     <Content Include="Scripts\URI.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -180,6 +182,7 @@
     <Content Include="Views\Main\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\font\04B_03__.TTF" />
     <None Include="Content\font\fontawesome-webfont.eot" />
     <None Include="Content\font\fontawesome-webfont.ttf" />
     <None Include="Content\font\fontawesome-webfont.woff" />

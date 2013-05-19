@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Net;
-using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Http;
@@ -17,23 +16,6 @@ namespace LoggingMonkey.Web.Controllers
 
     public class MainController : Controller
     {
-        protected string RenderPartialViewToString(string viewName, object model)
-        {
-            if (string.IsNullOrEmpty(viewName))
-                viewName = ControllerContext.RouteData.GetRequiredString("action");
-
-            ViewData.Model = model;
-
-            using (StringWriter sw = new StringWriter())
-            {
-                ViewEngineResult viewResult = ViewEngines.Engines.FindPartialView(ControllerContext, viewName);
-                ViewContext viewContext = new ViewContext(ControllerContext, viewResult.View, ViewData, TempData, sw);
-                viewResult.View.Render(viewContext, sw);
-
-                return sw.GetStringBuilder().ToString();
-            }
-        }
-
         private DateTime? ConvertQueryValueToDate(string qs)
         {
             var dateString = Request.QueryString[qs];

@@ -94,6 +94,8 @@ button {
 
 	text-shadow: 0px 1px 0px #9e9e9e;
 	box-shadow: 0px 1px 1px 0px #159342;
+
+    float: right;
 }
 
 .big-label {
@@ -211,6 +213,7 @@ header h1 {
 	margin-top: 0;
 	margin-bottom: 0;
 	padding: 3px 0;
+    word-wrap: break-word;
 }
 
 .message hr {
@@ -300,7 +303,7 @@ html[xmlns] .clearfix {
 	padding-left: 15px;
 }
 
-#caseSensitiveOption input {
+input[type=checkbox] {
 	margin-right: 10px;
 	position: relative;
 	top: 2px;
