@@ -3,7 +3,13 @@
 
 <div class="log-entry clearfix">
     <div class="date">@Html.GetDateFromDisplayOptions(Model.Timestamp)</div>
-    <div class="said-by"><span style="font-weight: bold;">@Model.Nick</span></div>
+    <div class="said-by">
+        <span style="font-weight: bold;">@Model.Nick</span>
+        @if (Model.UsesTor)
+        {
+            @(" / TOR")
+        }
+    </div>
     <div class="message">
         @for (var i = 0; i < Model.Lines.Count; i++)
         {
