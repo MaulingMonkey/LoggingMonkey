@@ -95,14 +95,10 @@
 
     switch (displayOptions.DateFormatType) {
         case 0:
-            dtformat = { dateFormat: 'm/d', timeFormat: 'h:mm tt' };
-            break;
-            
-        case 1:
             dtformat = { dateFormat: 'm/d/yy', timeFormat: 'h:mm:ss tt' };
             break;
             
-        case 2:
+        case 1:
             dtformat = { dateFormat: 'm/d/yy', timeFormat: 'H:mm:ss' };
             break;
     }

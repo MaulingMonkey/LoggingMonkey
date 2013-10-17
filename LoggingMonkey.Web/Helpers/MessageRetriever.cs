@@ -77,6 +77,7 @@ namespace LoggingMonkey.Web.Helpers
             Message msg = null;
             FastLogReader.LineType prevType = FastLogReader.LineType.Meta;
             string prevNick = null;
+            DateTime? prevWhen = null;
 
             foreach (var line in lines)
             {
@@ -92,7 +93,12 @@ namespace LoggingMonkey.Web.Helpers
                     }
                 }
 
-                if (prevNick != null && line.Nick == prevNick && line.Type == prevType)
+                if (prevWhen == null)
+                {
+                    prevWhen = line.When;
+                }
+
+                if (prevNick != null && line.Nick == prevNick && line.Type == prevType && line.When.Subtract(prevWhen.Value).Minutes <= 1)
                 {
                     msg.Lines.Add(line.Message);
                     continue;
@@ -102,6 +108,7 @@ namespace LoggingMonkey.Web.Helpers
 
                 prevNick = line.Nick;
                 prevType = line.Type;
+                prevWhen = line.When;
 
                 if (isTor)
                 {
