@@ -67,6 +67,34 @@ namespace LoggingMonkey.Web.Helpers
             }
         }
 
+        class PreviousMessageState
+        {
+            public void InitializeIfBlank(FastLogReader.Line line)
+            {
+                when = when ?? line.When;
+            }
+
+            public bool IsLinePartOfMessage(FastLogReader.Line line)
+            {
+                var messageExists = (nick != null && when.HasValue);
+ 
+                return (messageExists && nick == line.Nick && type == line.Type && line.When.Subtract(when.Value).Minutes <= 1);
+            }
+
+            public void WriteNewState(FastLogReader.Line line)
+            {
+                nick = line.Nick;
+                type = line.Type;
+                when = line.When;
+            }
+
+            private String nick;
+
+            private FastLogReader.LineType type = FastLogReader.LineType.Meta;
+
+            private DateTime? when;
+        }
+
         private static void Process(MessagesModel model, IEnumerable<FastLogReader.Line> lines)
         {
             //
@@ -75,49 +103,27 @@ namespace LoggingMonkey.Web.Helpers
             //
 
             Message msg = null;
-            FastLogReader.LineType prevType = FastLogReader.LineType.Meta;
-            string prevNick = null;
-            DateTime? prevWhen = null;
+
+            var previousState = new PreviousMessageState();
 
             foreach (var line in lines)
             {
                 var isTor = Tor.Lines.Contains(line.Host) || DnsCache.ResolveDontWait(line.Host).Any(ipv4 => Tor.Lines.Contains(ipv4));
 
-                if (msg == null)
-                {
-                    msg = new Message { Timestamp = line.When, Nick = line.Nick, Type = line.Type };
+                msg = msg ?? new Message { UsesTor = isTor, Timestamp = line.When, Nick = line.Nick, Type = line.Type };
 
-                    if (isTor)
-                    {
-                        msg.UsesTor = true;
-                    }
-                }
+                previousState.InitializeIfBlank(line); 
 
-                if (prevWhen == null)
-                {
-                    prevWhen = line.When;
-                }
-
-                if (prevNick != null && line.Nick == prevNick && line.Type == prevType && line.When.Subtract(prevWhen.Value).Minutes <= 1)
+                if (previousState.IsLinePartOfMessage(line))
                 {
                     msg.Lines.Add(line.Message);
                     continue;
                 }
 
-                msg = new Message();
+                previousState.WriteNewState(line);
 
-                prevNick = line.Nick;
-                prevType = line.Type;
-                prevWhen = line.When;
+                msg = new Message { UsesTor = isTor, Type = line.Type, Nick = line.Nick, Timestamp = line.When };
 
-                if (isTor)
-                {
-                    msg.UsesTor = true;
-                }
-
-                msg.Type = line.Type;
-                msg.Nick = line.Nick;
-                msg.Timestamp = line.When;
                 msg.Lines.Add(line.Message);
 
                 model.Messages.Add(msg);
