@@ -129,6 +129,7 @@
     </Compile>
     <Compile Include="Helpers\ChannelHelper.cs" />
     <Compile Include="Helpers\DateFormatTypes.cs" />
+    <Compile Include="Helpers\FixedLengthQueue.cs" />
     <Compile Include="Helpers\HtmlDateHelper.cs" />
     <Compile Include="Helpers\HtmlListHelpers.cs" />
     <Compile Include="Helpers\MatchTypes.cs" />

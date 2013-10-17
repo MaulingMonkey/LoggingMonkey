@@ -27,27 +27,34 @@
 			</div>
 		</section>
 
-		<section>
-			<div class="controls">
-				@Html.LabelFor(x => x.FromDate)
-				@Html.TextBoxFor(x => x.FromDate, new {@class = "datetimepicker", @Value = Html.GetDateFromDisplayOptions(Model.FromDate)})
-				<i style="position: relative; left: -25px; top: -1px;" class="icon-calendar"></i>
-			</div>
-			<div class="controls">
-				@Html.LabelFor(x => x.ToDate)
-				@Html.TextBoxFor(x => x.ToDate, new {@class = "datetimepicker", @Value = Html.GetDateFromDisplayOptions(Model.ToDate)})
-				<i style="position: relative; left: -25px; top: -1px;" class="icon-calendar"></i>
-			</div>
-		</section>
-		  
-		<section id="matchCaseOptions">
-			<div class="controls">
-				<label>Match using</label>
-			    @Html.DropDownListFor(x => x.MatchType, Html.MatchTypesList())
-			</div>
-			<div id="caseSensitiveOption" class="controls">
-				<label><input type="checkbox" /> Case Sensitive</label>
-			</div>
-		</section>
+	    <section>
+	        <div class="controls">
+	            @Html.LabelFor(x => x.FromDate)
+	            @Html.TextBoxFor(x => x.FromDate, new {@class = "datetimepicker", @Value = Html.GetDateFromDisplayOptions(Model.FromDate)})
+	            <i style="position: relative; left: -25px; top: -1px;" class="icon-calendar"></i>
+	        </div>
+	        <div class="controls">
+	            @Html.LabelFor(x => x.ToDate)
+	            @Html.TextBoxFor(x => x.ToDate, new {@class = "datetimepicker", @Value = Html.GetDateFromDisplayOptions(Model.ToDate)})
+	            <i style="position: relative; left: -25px; top: -1px;" class="icon-calendar"></i>
+	        </div>
+	    </section>
+        
+	    <section id="matchCaseOptions">
+	        <div class="controls">
+	            <label>Match using</label>
+	            @Html.DropDownListFor(x => x.MatchType, Html.MatchTypesList())
+	        </div>
+	        <div id="caseSensitiveOption" class="controls">
+	            <label><input type="checkbox" /> Case Sensitive</label>
+	        </div>
+	    </section>
+        
+	    <section style="clear:both; margin-top: 15px;">
+	        <div class="controls">
+	            @Html.LabelFor(x => x.Context)
+                @Html.TextBoxFor(x => x.Context)
+	        </div>
+	    </section> 
 	</div>
 }

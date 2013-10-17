@@ -54,15 +54,57 @@ namespace LoggingMonkey.Web.Helpers
             var hostMatcher = buildStringMatcherFor(search.Hostname);
             var msgMatcher  = buildStringMatcherFor(search.Message);
 
+            Func<FastLogReader.Line, bool> isDirectLineMatch = line =>
+            {
+                if (line.When < search.FromDate || line.When > search.ToDate) return false;
+
+                if (nickMatcher != null && !nickMatcher.IsMatch(line.Nick ?? String.Empty)) return false;
+                if (userMatcher != null && !userMatcher.IsMatch(line.User ?? String.Empty)) return false;
+                if (hostMatcher != null && !hostMatcher.IsMatch(line.Host ?? String.Empty)) return false;
+                if (msgMatcher != null && !msgMatcher.IsMatch(line.Message ?? String.Empty)) return false;
+
+                return true;
+            };
+
+            uint postContextCount = 0;
+            var queue = new FixedLengthQueue<FastLogReader.Line>(search.Context == 0 ? 1 : search.Context);
+
             foreach (var line in lines)
             {
-                if (line.When < search.FromDate || line.When > search.ToDate) continue;
+                // NOTE: The order of these if-statements matters.
 
-                if (nickMatcher != null && !nickMatcher.IsMatch(line.Nick   ?? String.Empty))   continue;
-                if (userMatcher != null && !userMatcher.IsMatch(line.User   ?? String.Empty))   continue;
-                if (hostMatcher != null && !hostMatcher.IsMatch(line.Host   ?? String.Empty))   continue;
-                if (msgMatcher  != null && !msgMatcher.IsMatch(line.Message ?? String.Empty))   continue;
+                if (isDirectLineMatch(line))
+                {
+                    // We have a match, but we also have some outstanding context lines to 
+                    // print prior to this one, so do that now.
+                    if (search.Context != 0)
+                    {
+                        while (queue.Count != 0)
+                        {
+                            yield return queue.Dequeue();
+                        }
 
+                        postContextCount = search.Context;
+                    }
+                }
+                // Not a match, but we have some trailing lines to print, so do that.
+                else if (postContextCount != 0)
+                {
+                    postContextCount--;
+                }
+                // Not a match, not even a trailing line. Candidate for a pre-context line. Queue it.
+                else if (search.Context != 0)
+                {
+                    queue.Enqueue(line);
+                    continue;
+                }
+                // Not a context-dependant search, so drop it.
+                else
+                {
+                    continue;
+                }
+
+                // Fallthrough, print a direct match or one of the current trailing lines.
                 yield return line;
             }
         }

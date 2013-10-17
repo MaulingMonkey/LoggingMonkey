@@ -27,12 +27,14 @@ namespace LoggingMonkey.Web.Models
         public MatchTypes MatchType { get; set; }
         public bool IsCaseSensitive { get; set; }
 
+        public uint Context { get; set; }
+
 	    public bool IsAdvancedSearch
 	    {
             get
             {
                 return !String.IsNullOrWhiteSpace(Username) || !String.IsNullOrWhiteSpace(Hostname) || FromDate.HasValue ||
-                       ToDate.HasValue || MatchType != MatchTypes.PlainText || IsCaseSensitive;
+                       ToDate.HasValue || MatchType != MatchTypes.PlainText || IsCaseSensitive || Context != 0;
             }
 	    }
 	}
