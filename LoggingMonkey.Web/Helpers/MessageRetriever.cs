@@ -54,17 +54,87 @@ namespace LoggingMonkey.Web.Helpers
             var hostMatcher = buildStringMatcherFor(search.Hostname);
             var msgMatcher  = buildStringMatcherFor(search.Message);
 
+            Func<FastLogReader.Line, bool> isDirectLineMatch = line =>
+            {
+                if (line.When < search.FromDate || line.When > search.ToDate) return false;
+
+                if (nickMatcher != null && !nickMatcher.IsMatch(line.Nick ?? String.Empty)) return false;
+                if (userMatcher != null && !userMatcher.IsMatch(line.User ?? String.Empty)) return false;
+                if (hostMatcher != null && !hostMatcher.IsMatch(line.Host ?? String.Empty)) return false;
+                if (msgMatcher != null && !msgMatcher.IsMatch(line.Message ?? String.Empty)) return false;
+
+                return true;
+            };
+
+            uint postContextCount = 0;
+            var queue = new FixedLengthQueue<FastLogReader.Line>(search.Context == 0 ? 1 : search.Context);
+
             foreach (var line in lines)
             {
-                if (line.When < search.FromDate || line.When > search.ToDate) continue;
+                // NOTE: The order of these if-statements matters.
 
-                if (nickMatcher != null && !nickMatcher.IsMatch(line.Nick   ?? String.Empty))   continue;
-                if (userMatcher != null && !userMatcher.IsMatch(line.User   ?? String.Empty))   continue;
-                if (hostMatcher != null && !hostMatcher.IsMatch(line.Host   ?? String.Empty))   continue;
-                if (msgMatcher  != null && !msgMatcher.IsMatch(line.Message ?? String.Empty))   continue;
+                if (isDirectLineMatch(line))
+                {
+                    // We have a match, but we also have some outstanding context lines to 
+                    // print prior to this one, so do that now.
+                    if (search.Context != 0)
+                    {
+                        while (queue.Count != 0)
+                        {
+                            yield return queue.Dequeue();
+                        }
 
+                        postContextCount = search.Context;
+                    }
+                }
+                // Not a match, but we have some trailing lines to print, so do that.
+                else if (postContextCount != 0)
+                {
+                    postContextCount--;
+                }
+                // Not a match, not even a trailing line. Candidate for a pre-context line. Queue it.
+                else if (search.Context != 0)
+                {
+                    queue.Enqueue(line);
+                    continue;
+                }
+                // Not a context-dependant search, so drop it.
+                else
+                {
+                    continue;
+                }
+
+                // Fallthrough, print a direct match or one of the current trailing lines.
                 yield return line;
             }
+        }
+
+        class PreviousMessageState
+        {
+            public void InitializeIfBlank(FastLogReader.Line line)
+            {
+                when = when ?? line.When;
+            }
+
+            public bool IsLinePartOfMessage(FastLogReader.Line line)
+            {
+                var messageExists = (nick != null && when.HasValue);
+ 
+                return (messageExists && nick == line.Nick && type == line.Type && line.When.Subtract(when.Value).Minutes <= 1);
+            }
+
+            public void WriteNewState(FastLogReader.Line line)
+            {
+                nick = line.Nick;
+                type = line.Type;
+                when = line.When;
+            }
+
+            private String nick;
+
+            private FastLogReader.LineType type = FastLogReader.LineType.Meta;
+
+            private DateTime? when;
         }
 
         private static void Process(MessagesModel model, IEnumerable<FastLogReader.Line> lines)
@@ -75,42 +145,27 @@ namespace LoggingMonkey.Web.Helpers
             //
 
             Message msg = null;
-            FastLogReader.LineType prevType = FastLogReader.LineType.Meta;
-            string prevNick = null;
+
+            var previousState = new PreviousMessageState();
 
             foreach (var line in lines)
             {
                 var isTor = Tor.Lines.Contains(line.Host) || DnsCache.ResolveDontWait(line.Host).Any(ipv4 => Tor.Lines.Contains(ipv4));
 
-                if (msg == null)
-                {
-                    msg = new Message { Timestamp = line.When, Nick = line.Nick, Type = line.Type };
+                msg = msg ?? new Message { UsesTor = isTor, Timestamp = line.When, Nick = line.Nick, Type = line.Type };
 
-                    if (isTor)
-                    {
-                        msg.UsesTor = true;
-                    }
-                }
+                previousState.InitializeIfBlank(line); 
 
-                if (prevNick != null && line.Nick == prevNick && line.Type == prevType)
+                if (previousState.IsLinePartOfMessage(line))
                 {
                     msg.Lines.Add(line.Message);
                     continue;
                 }
 
-                msg = new Message();
+                previousState.WriteNewState(line);
 
-                prevNick = line.Nick;
-                prevType = line.Type;
+                msg = new Message { UsesTor = isTor, Type = line.Type, Nick = line.Nick, Timestamp = line.When };
 
-                if (isTor)
-                {
-                    msg.UsesTor = true;
-                }
-
-                msg.Type = line.Type;
-                msg.Nick = line.Nick;
-                msg.Timestamp = line.When;
                 msg.Lines.Add(line.Message);
 
                 model.Messages.Add(msg);

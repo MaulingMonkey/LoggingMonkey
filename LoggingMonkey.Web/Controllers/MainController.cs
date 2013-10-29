@@ -52,7 +52,6 @@ namespace LoggingMonkey.Web.Controllers
         }
 
         [HttpPost]
-        [Whitelisted]
         public ActionResult UpdateDisplayOptions(DisplayOptionsModel model)
         {
             var cookie = new HttpCookie("LoggingMonkeyDisplay", DisplayOptionsModel.ToJson(model));

@@ -186,6 +186,8 @@ header h1 {
 	padding-bottom: 3px;
 	padding-left: 5px;
 	display: table;
+    font-size: 12px;
+    color: #444;
 }
 
 .said-by {
