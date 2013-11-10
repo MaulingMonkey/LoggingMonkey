@@ -73,6 +73,8 @@
     </Compile>
     <Compile Include="CachedWebFile.cs" />
     <Compile Include="ChannelLogs.cs" />
+    <Compile Include="FileAccessList.cs" />
+    <Compile Include="FileTransformedLineList.cs" />
     <Compile Include="Reactors\CompoundIrcMessageReactor.cs" />
     <Compile Include="DnsCache.cs" />
     <Compile Include="FastLogReader.cs" />

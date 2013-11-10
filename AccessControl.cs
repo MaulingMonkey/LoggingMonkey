@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -19,10 +18,10 @@ namespace LoggingMonkey
 		static readonly RSACryptoServiceProvider  RSA  = new RSACryptoServiceProvider();
 		static readonly SHA1CryptoServiceProvider Hash = new SHA1CryptoServiceProvider();
 
-		static readonly FileLineList mAdminlist     = new FileLineList(Paths.AdminTxt);
-		static readonly FileLineList mBlacklist     = new FileLineList(Paths.BlacklistTxt);
-		static readonly FileLineList mPendinglist   = new FileLineList(Paths.PendingTxt);
-		static readonly FileLineList mWhitelist     = new FileLineList(Paths.WhitelistTxt);
+		static readonly FileAccessList mAdminlist     = new FileAccessList(Paths.AdminTxt);
+		static readonly FileAccessList mBlacklist     = new FileAccessList(Paths.BlacklistTxt);
+		static readonly FileAccessList mPendinglist   = new FileAccessList(Paths.PendingTxt);
+		static readonly FileAccessList mWhitelist     = new FileAccessList(Paths.WhitelistTxt);
 
 		//static readonly 
 		static AccessControl()
@@ -45,13 +44,12 @@ namespace LoggingMonkey
 		/// <returns>Server-signed whitelisted ID</returns>
 		public static string RequestToken( string id )
 		{
-			if( mBlacklist.Contains(id) )
-				return ""; // No.
-
+			// Always create token
 			byte[] signed = RSA.SignData(Encoding.UTF8.GetBytes(id),Hash);
 			string token = "0|" + Convert.ToBase64String(Encoding.UTF8.GetBytes(id)) + "|" + Convert.ToBase64String(signed);
 
-			if( !mWhitelist.Contains(id) && !mPendinglist.Contains(id) )
+			// But don't re-add them to any list if they're on any of them.
+			if( !mBlacklist.ContainsUser(id) && !mWhitelist.ContainsUser(id) && !mPendinglist.ContainsUser(id) )
 				mPendinglist.AppendLine(id);
 
 			return token;
@@ -59,30 +57,30 @@ namespace LoggingMonkey
 
 		public static void Blacklist( string id )
 		{
-			if( !mBlacklist.Contains(id) )
+			if( !mBlacklist.ContainsLine(id) )
 				mBlacklist.AppendLine(id);
 		}
 
 		public static void Blacklist(string invokerId, string id)
 		{
-			if (!mAdminlist.Contains(invokerId))
+			if (!mAdminlist.ContainsUser(invokerId))
 			{
 				Console.WriteLine("{0} attempted to !blacklist {1}, was not found in adminlist.", invokerId, id);
 				return;
 			}
 
-			if (mBlacklist.Contains(id))
+			if (mBlacklist.ContainsLine(id))
 			{
 				Console.WriteLine("{0} called !blacklist on blacklisted target {1}", invokerId, id);
 				return;
 			}
 
-			if (mPendinglist.Contains(id))
+			if (mPendinglist.ContainsLine(id))
 			{
 				mPendinglist.RemoveLines(id);
 			}
 
-			if (mWhitelist.Contains(id))
+			if (mWhitelist.ContainsLine(id))
 			{
 				mWhitelist.RemoveLines(id);
 			}
@@ -93,31 +91,31 @@ namespace LoggingMonkey
 
 		public static void Whitelist( string id )
 		{
-			if( !mWhitelist.Contains(id) )
+			if( !mWhitelist.ContainsLine(id) )
 				mWhitelist.AppendLine(id);
 		}
 
 		public static void Whitelist( string invokerId, string id )
 		{
-			if (!mAdminlist.Contains(invokerId))
+			if (!mAdminlist.ContainsUser(invokerId))
 			{
 				Console.WriteLine("{0} attempted to !whitelist {1}, was not found in adminlist.", invokerId, id);
 				return;
 			}
 
-			if (mWhitelist.Contains(id))
+			if (mWhitelist.ContainsLine(id))
 			{
 				Console.WriteLine("{0} called !whitelist on a whitelisted target {1}", invokerId, id);
 				return;
 			}
 
-			if (mBlacklist.Contains(id))
+			if (mBlacklist.ContainsLine(id))
 			{
 				Console.WriteLine("{0} called !whitelist on a blacklisted target {1}. Removing target from blacklist.", invokerId, id);
 				mBlacklist.RemoveLines(id);
 			}
 
-			if (!mPendinglist.Contains(id))
+			if (!mPendinglist.ContainsLine(id))
 			{
 				Console.WriteLine("{0} called !whitelist on non-pending target {1}", invokerId, id);
 			}
@@ -152,7 +150,7 @@ namespace LoggingMonkey
 				var rawId = Convert.FromBase64String(split[1]);
 				var id = Encoding.UTF8.GetString(rawId);
 
-				if( mBlacklist.Contains(id) )
+				if( mBlacklist.ContainsUser(id) )
 					return AccessControlStatus.Blacklisted;
 
 				// fully verify string before acking as whitelisted
@@ -162,10 +160,10 @@ namespace LoggingMonkey
 				if( !RSA.VerifyData(rawId,Hash,rawSignedId) )
 					return AccessControlStatus.Error; // bad signature
 
-				if( mWhitelist.Contains(id) )
+				if( mWhitelist.ContainsUser(id) )
 					return AccessControlStatus.Whitelisted;
 
-				if( mPendinglist.Contains(id) )
+				if( mPendinglist.ContainsUser(id) )
 					return AccessControlStatus.Pending;
 
 				return AccessControlStatus.Error; // not on any list

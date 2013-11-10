@@ -33,19 +33,14 @@ namespace LoggingMonkey
 
 		public void RemoveLines(string line)
 		{
-			lock (Lock)
-			try
+			lock( Lock )
 			{
-				var lines = File.ReadAllLines(Path).Where(x => x != line).ToList();
+				var lines = this.Where(x => x != line).ToList();
 
-				using (var writer = new StreamWriter(Path, false, Encoding.UTF8))
+				using( var writer = new StreamWriter(Path, false, Encoding.UTF8) )
 				{
 					lines.ForEach(writer.WriteLine);
 				}
-			}
-			catch (Exception)
-			{
-				throw;
 			}
 		}
 
