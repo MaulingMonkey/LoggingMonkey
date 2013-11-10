@@ -56,11 +56,15 @@ namespace LoggingMonkey {
 		{
 			switch( acs )
 			{
-			case AccessControlStatus.Error:			return Program.AutoAllow;
-			case AccessControlStatus.Blacklisted:	return false;
-			case AccessControlStatus.Pending:		return Program.AutoAllow;
-			case AccessControlStatus.Whitelisted:	return true;
-			default:								return false;
+			case AccessControlStatus.Admin:
+			case AccessControlStatus.Whitelisted:
+				return true;
+			case AccessControlStatus.Pending:
+			case AccessControlStatus.Error:
+				return Program.AutoAllow;
+			case AccessControlStatus.Blacklisted:
+			default:
+				return false;
 			}
 		}
 
@@ -84,7 +88,7 @@ namespace LoggingMonkey {
 					break; // we'll handle this normally
 				case "/auth":
 					HandleAuthRequest( context, ref acs );
-					break;
+					break; // we'll handle this normally too
 				case "/robots.txt":
 					HandleRobotsRequest( context );
 					return; // EARLY BAIL
@@ -294,6 +298,7 @@ namespace LoggingMonkey {
 				writer.WriteLine("\t	table, tr, td { cell-spacing: 0; padding: 0; margin: 0; border-collapse: collapse; vertical-align: top; }");
 #endif
 				writer.WriteLine("\t	a        { color: blue; }");
+				writer.WriteLine("\t	a.twit   { color: orange; }");
 				writer.WriteLine("\t	a.tor    { color: red; }");
 				writer.WriteLine("\t	.link    { color: red; }");
 				writer.WriteLine("\t	.tooltip { display: none; background: black; color: white; padding: 5px; }");
@@ -355,9 +360,10 @@ namespace LoggingMonkey {
 					{
 						switch( acs )
 						{
-						case AccessControlStatus.Error:			writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  PM LoggingMonkey !auth to set an authorization cookie.</div>", channel ); break;
+						case AccessControlStatus.Admin:			writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  You're somehow simultaniously an admin yet not allowed in.</div>", channel ); break;
 						case AccessControlStatus.Whitelisted:	writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  You're somehow simultaniously whitelisted yet not allowed in.</div>", channel ); break;
 						case AccessControlStatus.Pending:		writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  Authorization cookie set, whitelisting pending.</div>", channel ); break;
+						case AccessControlStatus.Error:			writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  PM LoggingMonkey !auth to set an authorization cookie.</div>", channel ); break;
 						case AccessControlStatus.Blacklisted:	writer.WriteLine( "<div class=\"notice\">Not (yet) authorized to access channel logs for {0}.  Authorization cookie set, whitelisting pending...</div>", channel ); break;
 						}
 						clog = null;
@@ -366,11 +372,24 @@ namespace LoggingMonkey {
 
 				var pst = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
 
-				if ( clog!=null ) {
+				if( clog!=null )
+				{
 					if( clog.RequireAuth && acs == AccessControlStatus.Error )
 					{
 						writer.WriteLine("<hr>");
 						writer.WriteLine("<div class=\"notice\">NOTICE: LoggingMonkey will soon switch to a whitelist.  You don't currently have an authorization cookie set -- please PM LoggingMonkey !auth for a biodegradable and reusable authorization link.  #gamedev ban-ees need not apply.</div>");
+					}
+
+					if( acs == AccessControlStatus.Admin )
+					{
+						writer.WriteLine("<hr>");
+						writer.WriteLine("<div style=\"background: lightgreen;\">");
+						writer.WriteLine("Hello admin!  You now have access to the following channel commands:");
+						writer.WriteLine("	!whitelist nick!user@host");
+						writer.WriteLine("	!blacklist nick!user@host");
+						writer.WriteLine("	!twit[list] nick!user@host");
+						writer.WriteLine("	!untwit[list] nick!user@host");
+						writer.WriteLine("</div>");
 					}
 
 					var start2 = DateTime.Now;
@@ -380,12 +399,15 @@ namespace LoggingMonkey {
 
 					Action<FastLogReader.Line> write_nuh = (line) => {
 						bool isTor = Tor.Lines.Contains(line.Host) || DnsCache.ResolveDontWait(line.Host).Any(ipv4=>Tor.Lines.Contains(ipv4));
-						writer.Write("<a class='{0}' title='",isTor?"tor":"nottor");
-						writer.Write(HttpUtility.HtmlEncode(string.Format("{0}!{1}@{2}{3}",line.Nick,line.User,line.Host,isTor?" !TOR!":"")));
-						writer.Write("'>");
-						if( isTor ) writer.Write("&#9760; ");
-						writer.Write(HttpUtility.HtmlEncode(line.Nick));
-						if( isTor ) writer.Write(" &#9760;");
+						bool isTwit = AccessControl.InTwitlist( line.NUH );
+						bool showCrossbones = isTor; // || isTwit;
+
+						string class_ = isTor ? "tor" : isTwit ? "twit" : "normal";
+						string title = line.NUH + (isTor ? " !TOR!" : isTwit ? " !TWIT!" : "");
+						string nickFormat = showCrossbones ? "&#9760; {0} &#9760;" : "{0}";
+
+						writer.Write("<a class='{0}' title='{1}'>",class_,HttpUtility.HtmlEncode(title));
+						writer.Write( nickFormat, HttpUtility.HtmlEncode( line.Nick ) );
 						writer.Write("</a>");
 					};
 

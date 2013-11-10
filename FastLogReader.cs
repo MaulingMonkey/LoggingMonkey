@@ -88,6 +88,7 @@ namespace LoggingMonkey {
 			public LineType Type;
 			public DateTime When;
 			public string Nick, User, Host, Message;
+			public string NUH { get { return string.Format( "{0}!{1}@{2}", Nick ?? "", User ?? "", Host ?? "" ); }}
 
 			public override string ToString() {
 				return string.Format

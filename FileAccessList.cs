@@ -7,6 +7,7 @@ namespace LoggingMonkey
 	{
 		static readonly RegexOptions RegexOptions = RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase;
 
+		public string Description { get; private set; }
 		readonly FileTransformedLineList< Regex > FRLL;
 
 		static Regex WildcardsToRegex( string line )
@@ -14,8 +15,9 @@ namespace LoggingMonkey
 			return new Regex( string.Format( "^{0}$", Regex.Escape( line ).Replace( @"\*", @"(.*)" ) ), RegexOptions );
 		}
 
-		public FileAccessList( string path )
+		public FileAccessList( string description, string path )
 		{
+			Description = description;
 			FRLL = new FileTransformedLineList<Regex>( path, WildcardsToRegex );
 		}
 

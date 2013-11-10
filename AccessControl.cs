@@ -7,10 +7,16 @@ namespace LoggingMonkey
 {
 	public enum AccessControlStatus
 	{
+		// Positive access
+		Admin,
 		Whitelisted,
-		Blacklisted,
+
+		// Possible access
 		Pending,
 		Error,
+
+		// Negative access
+		Blacklisted,
 	}
 
 	public static class AccessControl
@@ -18,12 +24,18 @@ namespace LoggingMonkey
 		static readonly RSACryptoServiceProvider  RSA  = new RSACryptoServiceProvider();
 		static readonly SHA1CryptoServiceProvider Hash = new SHA1CryptoServiceProvider();
 
-		static readonly FileAccessList mAdminlist     = new FileAccessList(Paths.AdminTxt);
-		static readonly FileAccessList mBlacklist     = new FileAccessList(Paths.BlacklistTxt);
-		static readonly FileAccessList mPendinglist   = new FileAccessList(Paths.PendingTxt);
-		static readonly FileAccessList mWhitelist     = new FileAccessList(Paths.WhitelistTxt);
+		static readonly FileAccessList mAdminlist   = new FileAccessList( "Admin List",   Paths.AdminTxt     );
+		static readonly FileAccessList mBlacklist   = new FileAccessList( "Blacklist",    Paths.BlacklistTxt );
+		static readonly FileAccessList mPendinglist = new FileAccessList( "Pending List", Paths.PendingTxt   );
+		static readonly FileAccessList mWhitelist   = new FileAccessList( "Whitelist",    Paths.WhitelistTxt );
+		static readonly FileAccessList mTwitlist    = new FileAccessList( "Twit List",    Paths.TwitlistTxt  );
 
-		//static readonly 
+		static readonly AccessControlCommand
+			accWhitelist  = new AccessControlCommand( "!whitelist"  ) { InvokerRequires = { mAdminlist }, TargetAddedTo = { mWhitelist }, TargetRemovedFrom = { mPendinglist, mBlacklist } },
+			accBlacklist  = new AccessControlCommand( "!blacklist"  ) { InvokerRequires = { mAdminlist }, TargetAddedTo = { mBlacklist }, TargetRemovedFrom = { mPendinglist, mWhitelist } },
+			accTwitlist   = new AccessControlCommand( "!twitlist"   ) { InvokerRequires = { mAdminlist }, TargetAddedTo = { mTwitlist } },
+			accUnTwitlist = new AccessControlCommand( "!untwitlist" ) { InvokerRequires = { mAdminlist }, TargetRemovedFrom = { mTwitlist } };
+
 		static AccessControl()
 		{
 			if( !File.Exists(Paths.RsaKey) )
@@ -55,78 +67,12 @@ namespace LoggingMonkey
 			return token;
 		}
 
-		public static void Blacklist( string id )
-		{
-			if( !mBlacklist.ContainsLine(id) )
-				mBlacklist.AppendLine(id);
-		}
+		public static void Whitelist ( string invokerId, string targetId ) { accWhitelist .Invoke( invokerId, targetId ); }
+		public static void Blacklist ( string invokerId, string targetId ) { accBlacklist .Invoke( invokerId, targetId ); }
+		public static void Twitlist  ( string invokerId, string targetId ) { accTwitlist  .Invoke( invokerId, targetId ); }
+		public static void Untwitlist( string invokerId, string targetId ) { accUnTwitlist.Invoke( invokerId, targetId ); }
 
-		public static void Blacklist(string invokerId, string id)
-		{
-			if (!mAdminlist.ContainsUser(invokerId))
-			{
-				Console.WriteLine("{0} attempted to !blacklist {1}, was not found in adminlist.", invokerId, id);
-				return;
-			}
-
-			if (mBlacklist.ContainsLine(id))
-			{
-				Console.WriteLine("{0} called !blacklist on blacklisted target {1}", invokerId, id);
-				return;
-			}
-
-			if (mPendinglist.ContainsLine(id))
-			{
-				mPendinglist.RemoveLines(id);
-			}
-
-			if (mWhitelist.ContainsLine(id))
-			{
-				mWhitelist.RemoveLines(id);
-			}
-
-			Blacklist(id);
-			Console.WriteLine("{0} !blacklisted {1}", invokerId, id);
-		}
-
-		public static void Whitelist( string id )
-		{
-			if( !mWhitelist.ContainsLine(id) )
-				mWhitelist.AppendLine(id);
-		}
-
-		public static void Whitelist( string invokerId, string id )
-		{
-			if (!mAdminlist.ContainsUser(invokerId))
-			{
-				Console.WriteLine("{0} attempted to !whitelist {1}, was not found in adminlist.", invokerId, id);
-				return;
-			}
-
-			if (mWhitelist.ContainsLine(id))
-			{
-				Console.WriteLine("{0} called !whitelist on a whitelisted target {1}", invokerId, id);
-				return;
-			}
-
-			if (mBlacklist.ContainsLine(id))
-			{
-				Console.WriteLine("{0} called !whitelist on a blacklisted target {1}. Removing target from blacklist.", invokerId, id);
-				mBlacklist.RemoveLines(id);
-			}
-
-			if (!mPendinglist.ContainsLine(id))
-			{
-				Console.WriteLine("{0} called !whitelist on non-pending target {1}", invokerId, id);
-			}
-			else
-			{
-				mPendinglist.RemoveLines(id);
-			}
-
-			Console.WriteLine("{0} added {1} to whitelist", invokerId, id);
-			Whitelist(id);
-		}
+		public static bool InTwitlist( string targetId ) { return mTwitlist.ContainsUser( targetId ); }
 
 		public static string Decode( string data )
 		{
@@ -137,6 +83,7 @@ namespace LoggingMonkey
 		{
 			try
 			{
+				// Check for negative & negative-leaning access first as it overrides positive access.
 				if( string.IsNullOrEmpty(data) )
 					return AccessControlStatus.Error;
 
@@ -160,9 +107,16 @@ namespace LoggingMonkey
 				if( !RSA.VerifyData(rawId,Hash,rawSignedId) )
 					return AccessControlStatus.Error; // bad signature
 
+
+				// Now check for positive access as it overrides the remaining possible access
+				if( mAdminlist.ContainsUser(id) )
+					return AccessControlStatus.Admin;
+
 				if( mWhitelist.ContainsUser(id) )
 					return AccessControlStatus.Whitelisted;
 
+
+				// ...nothing positive or negative, determine "possible" access flavor
 				if( mPendinglist.ContainsUser(id) )
 					return AccessControlStatus.Pending;
 

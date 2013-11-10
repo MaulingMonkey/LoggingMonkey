@@ -52,18 +52,12 @@ namespace LoggingMonkey {
 					Console.WriteLine("{0} used !auth, responded with token {1}",who,token);
 				} catch ( Exception ) {}
 			}}
-			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!whitelist (?<user>[^ ]+)$", (network, m) => {
-				var invoker = m.Groups["who"].Value;
-				var target = m.Groups["user"].Value;
-
-				AccessControl.Whitelist(invoker, target);
-			}}
-			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!blacklist (?<user>[^ ]+)$", (network, m) => {
-				var invoker = m.Groups["who"].Value;
-				var target = m.Groups["user"].Value;
-
-				AccessControl.Blacklist(invoker, target);
-			}}
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!whitelist (?<user>[^ ]+)$"      , (network, m) => AccessControl.Whitelist ( m.Groups["who"].Value, m.Groups["user"].Value ) }
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!blacklist (?<user>[^ ]+)$"      , (network, m) => AccessControl.Blacklist ( m.Groups["who"].Value, m.Groups["user"].Value ) }
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!twit (?<user>[^ ]+)$"           , (network, m) => AccessControl.Twitlist  ( m.Groups["who"].Value, m.Groups["user"].Value ) }
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!untwit (?<user>[^ ]+)$"         , (network, m) => AccessControl.Untwitlist( m.Groups["who"].Value, m.Groups["user"].Value ) }
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!twitlist (?<user>[^ ]+)$"       , (network, m) => AccessControl.Twitlist  ( m.Groups["who"].Value, m.Groups["user"].Value ) }
+			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!untwitlist (?<user>[^ ]+)$"     , (network, m) => AccessControl.Untwitlist( m.Groups["who"].Value, m.Groups["user"].Value ) }
 			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channels>[^ ]+) \:?(?<message>.+)$"                , "[{when}] <{who}> {message}" }
 			, { @"^\:(?<who>[^ ]+) JOIN (?<channels>[^ ]+)$"                                     , "[{when}] -->| {who} has joined {channel}" }
 			, { @"^\:(?<who>[^ ]+) PART (?<channels>[^ ]+) ?\:?(?<message>.*)$"                  , "[{when}] |<-- {who} has left {channel} ({message})" }

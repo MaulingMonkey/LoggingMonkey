@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccessControl.cs" />
+    <Compile Include="AccessControlCommand.cs" />
     <Compile Include="AllLogs.cs" />
     <Compile Include="Assets.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -13,6 +13,7 @@ namespace LoggingMonkey
 		public static readonly string BlacklistTxt   = Platform.IsOnUnix ? @"/home/loggingmonkey/blacklist.txt" : @"I:\home\configs\lm-blacklist.txt";
 		public static readonly string PendingTxt     = Platform.IsOnUnix ? @"/home/loggingmonkey/pending.txt"   : @"I:\home\configs\lm-pending.txt";
 		public static readonly string WhitelistTxt   = Platform.IsOnUnix ? @"/home/loggingmonkey/whitelist.txt" : @"I:\home\configs\lm-whitelist.txt";
+		public static readonly string TwitlistTxt    = Platform.IsOnUnix ? @"/home/loggingmonkey/twitlist.txt"  : @"I:\home\configs\lm-twitlist.txt";
 		public static readonly string AutoAllowTxt   = Platform.IsOnUnix ? @"/home/loggingmonkey/blacklist.txt" : @"I:\home\configs\lm-autoallow.txt";
 	}
 }
