@@ -85,7 +85,7 @@
     <Compile Include="IO\Net\DnsCache.cs" />
     <Compile Include="IO\File\FastLogReader.cs" />
     <Compile Include="IO\File\FileLineList.cs" />
-    <Compile Include="HttpLogServer.cs" />
+    <Compile Include="IO\Http\HttpLogServer.cs" />
     <Compile Include="Reactors\IIrcMessageReactor.cs" />
     <Compile Include="Reactors\IrcMessageRegexReactor.cs" />
     <Compile Include="Reactors\IrcMessageLoggerReactor.cs" />
