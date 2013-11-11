@@ -1,224 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Packaging;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
 namespace LoggingMonkey {
-	class HttpLogServer {
-		readonly HttpListener Listener;
+	partial class HttpLogServer {
 		readonly CachedHashedWebCsvFile Tor = new CachedHashedWebCsvFile
 			( Path.Combine(Path.GetTempPath(),"tor.csv")
 			, @"http://torstatus.blutmagie.de/ip_list_all.php/Tor_ip_list_ALL.csv"
 			);
-
-		public HttpLogServer() {
-			Listener = new HttpListener()
-				{ Prefixes = { Program.PrimaryPrefix }
-				};
-			Listener.Start();
-			Listener.BeginGetContext(OnGetContext,null);
-		}
-
-		AllLogs _Logs;
-		public void SetLogs( AllLogs logs ) {
-			lock (Listener) {
-				Debug.Assert(_Logs==null);
-				_Logs=logs;
-			}
-		}
-
-		/// <summary>
-		/// Nearly identical to Program.reWho, but allows * in nicks
-		/// </summary>
-		static readonly Regex reBanMask = new Regex(@"(?<nick>[^;! ]+)!(?<user>[^@ ]+)@(?<host>[^&> ]+)", RegexOptions.Compiled);
-
-		AccessControlStatus GetAuth( HttpListenerContext context )
-		{
-			// Determine auth
-			AccessControlStatus acs = AccessControlStatus.Error;
-			foreach( Cookie cookie in context.Request.Cookies )
-			if( cookie.Name == Program.AuthCookieName )
-			{
-				acs = AccessControl.GetStatus( cookie.Value );
-				break;
-			}
-			return acs;
-		}
-
-		bool Allow( AccessControlStatus acs )
-		{
-			switch( acs )
-			{
-			case AccessControlStatus.Admin:
-			case AccessControlStatus.Whitelisted:
-				return true;
-			case AccessControlStatus.Pending:
-			case AccessControlStatus.Error:
-				return Program.AutoAllow;
-			case AccessControlStatus.Blacklisted:
-			default:
-				return false;
-			}
-		}
-
-		static readonly Regex reAuthQuery = new Regex( @"^\?token=(?<token>.*)$", RegexOptions.Compiled );
-
-		void OnGetContext( IAsyncResult result ) {
-			if ( !Listener.IsListening ) return;
-
-			Listener.BeginGetContext( OnGetContext, null );
-			var context = Listener.EndGetContext(result);
-
-			var acs = GetAuth(context);
-
-			AllLogs logs;
-			lock( Listener ) logs = _Logs;
-
-			try {
-				// Handle special cases:
-				switch ( context.Request.Url.AbsolutePath.ToLowerInvariant() ) {
-				case "/":
-					break; // we'll handle this normally
-				case "/auth":
-					HandleAuthRequest( context, ref acs );
-					break; // we'll handle this normally too
-				case "/robots.txt":
-					HandleRobotsRequest( context );
-					return; // EARLY BAIL
-				case "/04b_03__.ttf":
-					HandleFontRequest( context );
-					return; // EARLY BAIL
-				case "/backup.zip":
-					HandleBackupRequest( context, acs );
-					return; // EARLY BAIL
-				default:
-					HandleInvalidPageRequest( context );
-					return; // EARLY BAIL
-				}
-
-				// handle normally:
-				HandleLogsRequest( context, acs, logs );
-#if !DEBUG
-			} catch ( Exception e ) {
-				if ( Platform.IsOnUnix ) {
-					File.AppendAllText( Paths.ExceptionsTxt, e.ToString() );
-				} else if( Debugger.IsAttached ) {
-					Debugger.Break();
-				}
-#endif
-			} finally {
-				context.Response.Close();
-			}
-		}
-
-		private static void HandleAuthRequest( HttpListenerContext context, ref AccessControlStatus acs )
-		{
-			var m = reAuthQuery.Match( context.Request.Url.Query ?? "" );
-			if( m.Success && m.Groups["token"].Success )
-			{
-				var expiration = DateTime.UtcNow.AddYears(10).ToString("ddd, dd-MMM-yyyy H:mm:ss"); // http://stackoverflow.com/questions/4811009/c-sharp-httplistener-cookies-expiring-after-session-even-though-expiration-time
-				var token = HttpUtility.UrlDecode(m.Groups["token"].Value);
-				context.Response.Headers.Add("Set-Cookie", string.Format("{0}={1};Path=/;Expires={2} GMT",Program.AuthCookieName,token,expiration));
-				acs = AccessControl.GetStatus(token);
-			}
-		}
-
-		private static void HandleRobotsRequest( HttpListenerContext context )
-		{
-			context.Response.ContentEncoding = Encoding.UTF8;
-			context.Response.ContentType = "text/plain";
-			using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) ) {
-				writer.Write
-					( "User-agent: *\n"
-					+ "Disallow: /\n"
-					);
-			}
-		}
-
-		private static void HandleFontRequest( HttpListenerContext context )
-		{
-			var font = Assets.ResourceManager.GetObject( "_04B_03__" ) as byte[];
-			context.Response.OutputStream.Write( font, 0, font.Length );
-		}
-
-		private void HandleBackupRequest( HttpListenerContext context, AccessControlStatus acs )
-		{
-			if( !Allow( acs ) )
-			{
-				context.Response.StatusCode = 401;
-				context.Response.ContentEncoding = Encoding.UTF8;
-				context.Response.ContentType = "text/html";
-				using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) )
-				{
-					writer.Write
-						( "<html><head>\n"
-						+ "	<title>" + acs.ToString() + "</title>\n"
-						+ "</head><body>\n"
-						+ "	Your ID has " + ((acs==AccessControlStatus.Blacklisted) ? "been blacklisted" : "not yet been whitelisted") + "<br>\n"
-						+ "</body></html>\n"
-						);
-				}
-				return;// Require auth
-			}
-
-			// TODO: Handle multiple backup.zip requests
-			Stream zip = null;
-			try {
-				zip = File.Open( Paths.BackupZip, FileMode.Create, FileAccess.ReadWrite, FileShare.None );
-			} catch ( IOException ) {
-				context.Response.ContentEncoding = Encoding.UTF8;
-				context.Response.ContentType = "text/plain";
-				context.Response.StatusCode = 503;
-				using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) ) {
-					writer.Write("Couldn't open backup zip (already backing up?)\n");
-				}
-				return; // EARLY BAIL
-			}
-
-			using ( zip ) {
-				using ( var package = ZipPackage.Open(zip,FileMode.Create) ) {
-					foreach ( var logfile in Directory.GetFiles(Paths.LogsDirectory,"*.log",SearchOption.TopDirectoryOnly) ) {
-						var relfile = Uri.EscapeDataString( Path.GetFileName(logfile) );
-						var uri = PackUriHelper.CreatePartUri( new Uri(relfile,UriKind.Relative) );
-						var part = package.CreatePart( uri, System.Net.Mime.MediaTypeNames.Text.Plain, CompressionOption.Maximum );
-						using ( var fstream = File.Open(logfile,FileMode.Open,FileAccess.Read,FileShare.ReadWrite) ) using ( var partstream = part.GetStream() ) fstream.CopyTo(partstream);
-						package.Flush();
-					}
-					package.Close();
-				}
-				zip.Flush();
-				zip.Position = 0;
-
-				context.Response.ContentType = "application/zip";
-				context.Response.ContentLength64 = zip.Length;
-				zip.CopyTo(context.Response.OutputStream);
-			}
-			return; // EARLY BAIL
-		}
-
-		private static void HandleInvalidPageRequest( HttpListenerContext context )
-		{
-			context.Response.StatusCode = 404;
-			context.Response.ContentEncoding = Encoding.UTF8;
-			context.Response.ContentType = "text/html";
-			using ( var writer = new StreamWriter(context.Response.OutputStream, Encoding.UTF8) ) {
-				writer.Write
-					(  "<html><head>\n"
-					+  "	<title>No such page</title>\n"
-					+  "</head><body>\n"
-					+  "	No such page "+context.Request.Url.AbsoluteUri+"<br>\n"
-					+  "	Try <a href=\"/\">"+context.Request.Url.Host+"</a> instead you silly git<br>\n"
-					+  "</body></html>\n"
-					);
-			}
-		}
 
 		private void HandleLogsRequest( HttpListenerContext context, AccessControlStatus acs, AllLogs logs )
 		{
@@ -270,7 +64,7 @@ namespace LoggingMonkey {
 
 			if ( !string.IsNullOrEmpty(nickquerys) && string.IsNullOrEmpty(userquerys) && string.IsNullOrEmpty(hostquerys) )
 			{
-				Match nuh = reBanMask.Match(nickquerys);
+				Match nuh = Regexps.IrcWhoMask.Match(nickquerys);
 				if ( nuh.Success )
 				{
 					var oldqt = querytype;

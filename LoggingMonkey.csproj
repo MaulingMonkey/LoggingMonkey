@@ -66,6 +66,11 @@
   <ItemGroup>
     <Compile Include="Config\AccessControl.cs" />
     <Compile Include="Config\AccessControlCommand.cs" />
+    <Compile Include="IO\Http\HttpLogServer.HandleAuthRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer.HandleFontRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer.HandleBackupRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer.HandleInvalidPageRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer.HandleRobotsRequest.cs" />
     <Compile Include="Model\AllLogs.cs" />
     <Compile Include="Assets.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -104,6 +109,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IO\Http\HttpLogServer.HandleLogsRequest.cs" />
     <None Include="Resources\04B_03__.TTF" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
