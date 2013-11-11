@@ -64,38 +64,38 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AccessControl.cs" />
-    <Compile Include="AccessControlCommand.cs" />
-    <Compile Include="AllLogs.cs" />
+    <Compile Include="Config\AccessControl.cs" />
+    <Compile Include="Config\AccessControlCommand.cs" />
+    <Compile Include="Model\AllLogs.cs" />
     <Compile Include="Assets.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Assets.resx</DependentUpon>
     </Compile>
-    <Compile Include="CachedWebFile.cs" />
-    <Compile Include="ChannelLogs.cs" />
-    <Compile Include="FileAccessList.cs" />
-    <Compile Include="FileTransformedLineList.cs" />
+    <Compile Include="IO\CachedWebFile.cs" />
+    <Compile Include="Model\ChannelLogs.cs" />
+    <Compile Include="IO\File\FileAccessList.cs" />
+    <Compile Include="IO\File\FileTransformedLineList.cs" />
     <Compile Include="Reactors\CompoundIrcMessageReactor.cs" />
-    <Compile Include="DnsCache.cs" />
-    <Compile Include="FastLogReader.cs" />
-    <Compile Include="FileLineList.cs" />
+    <Compile Include="IO\Net\DnsCache.cs" />
+    <Compile Include="IO\File\FastLogReader.cs" />
+    <Compile Include="IO\File\FileLineList.cs" />
     <Compile Include="HttpLogServer.cs" />
     <Compile Include="Reactors\IIrcMessageReactor.cs" />
     <Compile Include="Reactors\IrcMessageRegexReactor.cs" />
     <Compile Include="Reactors\IrcMessageLoggerReactor.cs" />
     <Compile Include="Reactors\IrcMessageReactor.cs" />
-    <Compile Include="Network.cs" />
-    <Compile Include="NetworkLogs.cs" />
-    <Compile Include="Parallel.cs" />
-    <Compile Include="Paths.cs" />
-    <Compile Include="Platform.cs" />
-    <Compile Include="Pretty.cs" />
+    <Compile Include="IO\Net\Network.cs" />
+    <Compile Include="Model\NetworkLogs.cs" />
+    <Compile Include="Miscellanious\Parallel.cs" />
+    <Compile Include="Config\Paths.cs" />
+    <Compile Include="Config\Platform.cs" />
+    <Compile Include="Miscellanious\Pretty.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Regexps.cs" />
+    <Compile Include="Miscellanious\Regexps.cs" />
     <Compile Include="Reactors\X3MessageServices.cs" />
-    <Compile Include="_ Extension Methods.cs" />
+    <Compile Include="ExtensionMethods\System.IO.Stream.CopyTo.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets.resx">
