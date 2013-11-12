@@ -42,7 +42,7 @@ namespace LoggingMonkey {
 				{ "/robots.txt"    , a => HandleRobotsRequest( a.HttpListenerContext ) },
 				{ "/04b_03__.ttf"  , a => HandleFontRequest( a.HttpListenerContext ) },
 				{ "/backup.zip"    , a => HandleBackupRequest( a.HttpListenerContext, a.AccessControlStatus ) },
-				{ null             , a => HandleInvalidPageRequest( a.HttpListenerContext ) },
+				{ "/404"           , a => HandleInvalidPageRequest( a.HttpListenerContext ) },
 			};
 		}
 
@@ -86,8 +86,8 @@ namespace LoggingMonkey {
 			
 			// Handle special cases:
 			var path = context.Request.Url.AbsolutePath.ToLowerInvariant();
-			if( Handlers.ContainsKey(path) )
-				path = null;
+			if( !Handlers.ContainsKey(path) )
+				path = "/404";
 
 			var args = new HandlerArgs( )
 			{
