@@ -44,6 +44,9 @@ namespace LoggingMonkey {
 			}
 		}
 
+		static readonly TimeSpan MaxTimeout = TimeSpan.FromMinutes( 1 );
+		TimeSpan Backoff = TimeSpan.Zero;
+
 		Exception LastException = null;
 		public void Work() {
 			for (;;)
@@ -60,6 +63,7 @@ namespace LoggingMonkey {
 					continue;
 				}
 
+				Backoff = TimeSpan.Zero;
 				IrcMessageReactor.Default.TryReact( this, line );
 			}
 			catch ( Exception e )
@@ -80,7 +84,12 @@ namespace LoggingMonkey {
 			}
 		}
 
-		void Reconnect() {
+		void Reconnect( ) {
+			Thread.Sleep( Backoff );
+			Backoff += TimeSpan.FromSeconds( 5 );
+			if( Backoff > MaxTimeout )
+				Backoff = MaxTimeout;
+
 			using ( StreamWriter ) StreamWriter = null;
 			using ( StreamReader ) StreamReader = null;
 			using ( NetworkStream ) NetworkStream = null;
