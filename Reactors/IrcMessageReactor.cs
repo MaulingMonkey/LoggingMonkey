@@ -35,7 +35,7 @@ namespace LoggingMonkey {
 						SpamLimiterList[host]=now;
 					} catch ( Exception ) {}
 					logs.Log(m,"[{when}] <{who}> !last {few}");
-					Console.WriteLine("{0} used !last",m.Groups["who"].Value);
+					Debug.WriteLine("{0} used !last",m.Groups["who"].Value);
 				}
 			}}
 			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!auth$", (network,m) => {
@@ -49,7 +49,7 @@ namespace LoggingMonkey {
 					var host = who.Substring(who.IndexOf('@')+1);
 					var token = AccessControl.RequestToken(who);
 					network.Send( "NOTICE "+nick+ " :"+Program.PrimaryPrefix+"auth?token="+HttpUtility.UrlEncode(token) );
-					Console.WriteLine("{0} used !auth, responded with token {1}",who,token);
+					Debug.WriteLine("{0} used !auth, responded with token {1}",who,token);
 				} catch ( Exception ) {}
 			}}
 			, { @"^\:(?<who>[^ ]+) PRIVMSG (?<channel>[^ ]+) \:?!whitelist (?<user>[^ ]+)$"      , (network, m) => AccessControl.Whitelist ( m.Groups["who"].Value, m.Groups["user"].Value ) }

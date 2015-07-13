@@ -7,6 +7,7 @@ namespace LoggingMonkey
 		public static readonly string BackupZip      = Platform.IsOnUnix ? @"/home/loggingmonkey/logs-backup.zip" : @"I:\home\logs-backup.zip";
 		public static readonly string LogsDirectory  = Platform.IsOnUnix ? @"/home/loggingmonkey/logs/"           : @"I:\home\logs\";
 		public static readonly string ExceptionsTxt  = Platform.IsOnUnix ? @"/home/loggingmonkey/exceptions.txt"  : null;
+		public static readonly string DebugTxt       = Platform.IsOnUnix ? @"/home/loggingmonkey/debug.txt"       : @"I:\home\logs\debug.txt";
 		public static readonly string RsaKey         = Platform.IsOnUnix ? @"/home/loggingmonkey/key.dsa"         : @"I:\home\configs\lm-key.dsa";
 
 		public static readonly string AdminTxt       = Platform.IsOnUnix ? @"/home/loggingmonkey/admin.txt"     : @"I:\home\configs\lm-admin.txt";

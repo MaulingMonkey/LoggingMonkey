@@ -38,6 +38,10 @@ namespace LoggingMonkey {
 		}
 
 		static void Main() {
+			Debug.LogReleaseExceptions( () => Work() );
+		}
+
+		static void Work() {
 			try {
 				Console.CancelKeyPress += (sender,args) => {
 					args.Cancel = true;
@@ -47,7 +51,7 @@ namespace LoggingMonkey {
 			}
 
 			var procstart = DateTime.Now;
-			Console.WriteLine( "=== Process start at {0} ===", procstart );
+			Debug.WriteLine( "=== Process start at {0} ===", procstart );
 
 			var logpattern = Paths.LogsDirectory+"{network}-{channel}-{year}-{month}-{day}.log";
 #if DEBUG
@@ -63,21 +67,21 @@ namespace LoggingMonkey {
 			foreach ( var ch in whitelistChannels ) afternet.Channel(ch).RequireAuth = true;
 			afternet.Channel("#gamedev");
 
-			Console.Write( "Beginning log server..." );
+			Debug.Write( "Beginning log server..." );
 			var server = new HttpLogServer();
-			Console.WriteLine( "\rLog server started.                             " );
+			Debug.WriteLine( "\rLog server started.                             " );
 
 
 
-			Console.Write("LoggingMonkey comming online...");
+			Debug.Write("LoggingMonkey comming online...");
 			var bot = new Network( "irc.afternet.org", channels, logs );
 			var bott = new Thread(bot.Work);
 			bott.Start();
-			Console.WriteLine("\rLoggingMonkey online.                            ");
+			Debug.WriteLine("\rLoggingMonkey online.                            ");
 
 
 
-			Console.Write("Getting directory list...");
+			Debug.Write("Getting directory list...");
 			var files = Directory
 				.GetFiles(Paths.LogsDirectory, "*.log", SearchOption.TopDirectoryOnly )
 				.OrderBy( file => {
@@ -99,17 +103,17 @@ namespace LoggingMonkey {
 
 
 
-			Console.Write("Starting GC...");
+			Debug.Write("Starting GC...");
 			var before = GC.GetTotalMemory(false);
 			var after  = GC.GetTotalMemory(true);
-			Console.WriteLine("\rFinished GC. Before: {0}  After: {1}  Saved: {2}"
+			Debug.WriteLine("\rFinished GC. Before: {0}  After: {1}  Saved: {2}"
 				, Pretty.FormatMemory(before)
 				, Pretty.FormatMemory(after)
 				, Pretty.FormatMemory(before-after)
 				);
 
 			server.SetLogs(logs);
-			Console.WriteLine("Logs now being served.");
+			Debug.WriteLine("Logs now being served.");
 
 			for (;;) {
 				//Console.Write("> ");

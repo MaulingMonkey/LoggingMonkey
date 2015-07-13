@@ -72,13 +72,13 @@ namespace LoggingMonkey {
 				bool same = (LastException!=null) && e.Message == LastException.Message;
 				same = false;
 
-				Console.Write(same?"\r":"\n");
+				Debug.Write(same?"\r":"\n");
 
 				if ( se!=null ) switch ( se.SocketErrorCode ) {
-				case SocketError.HostNotFound: Console.Write( "[{0}] No such host is known (intertubes are probably down)", DateTime.Now ); break;
-				default:                       Console.Write( "[{0}] Miscellanious socket error: {1}", DateTime.Now, se.SocketErrorCode ); break;
+				case SocketError.HostNotFound: Debug.Write( "[{0}] No such host is known (intertubes are probably down)", DateTime.Now ); break;
+				default:                       Debug.Write( "[{0}] Miscellanious socket error: {1}", DateTime.Now, se.SocketErrorCode ); break;
 				} else {
-					Console.Write( "[{0}] Miscellanious exception: {1}", DateTime.Now, e.Message );
+					Debug.Write( "[{0}] Miscellanious exception: {1}", DateTime.Now, e.Message );
 				}
 				LastException = e;
 			}
