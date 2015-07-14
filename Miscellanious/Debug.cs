@@ -51,7 +51,7 @@ namespace LoggingMonkey {
 		public static void LogReleaseExceptions( Action a )
 		{
 #if !DEBUG
-			lock( Mutex ) try {
+			try {
 #endif
 				a( );
 #if !DEBUG
