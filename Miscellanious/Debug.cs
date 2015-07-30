@@ -13,6 +13,12 @@ namespace LoggingMonkey {
 			DebugLog = new StreamWriter( Paths.DebugTxt, true, Encoding.UTF8 );
 		}
 
+		static string StripAbsPrefix( string path ) {
+			var prefix = "LoggingMonkey\\";
+			var index = path.IndexOf(prefix);
+			return (index==-1) ? path : path.Substring( index + prefix.Length );
+		}
+
 		public static void Assert
 			( bool					condition
 			, [CallerMemberName]	string	callerMemberName	= ""
@@ -21,7 +27,13 @@ namespace LoggingMonkey {
 			)
 		{
 			if( condition ) return; // assert passed
-			WriteLine( "{0}:{1} {2}: Assert failed", callerFilePath, callerLineNumber, callerMemberName );
+			WriteLine
+				( "[0] {1}:{2} {3}: Assert failed"
+				, DateTime.Now
+				, StripAbsPrefix( callerFilePath )
+				, callerLineNumber
+				, callerMemberName
+				);
 		}
 
 		public static void WriteLine( string format, params object[] args ) { WriteLine( string.Format( format, args ) ); }

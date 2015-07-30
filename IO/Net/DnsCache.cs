@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Globalization;
 
 namespace LoggingMonkey {
-    public static class DnsCache {
+	public static class DnsCache {
 		static readonly Dictionary<string,string[]> HostToIpv4 = new Dictionary<string,string[]>();
 		static readonly AutoResetEvent ARE = new AutoResetEvent(false);
 
@@ -24,6 +23,8 @@ namespace LoggingMonkey {
 			case SocketError.HostNotFound:
 			case SocketError.NoData:
 				return ErrorType.PermanentKnown;
+			case SocketError.TryAgain: // DNS down?
+				return ErrorType.TemporaryKnown;
 			default:
 				Debug.WriteLine( string.Format( "WARNING: Unexpected SocketException with SocketErrorCode=={0} in {1}", Enum.GetName(typeof(SocketError),se.SocketErrorCode), context ) );
 				return ErrorType.TemporaryUnknown;
