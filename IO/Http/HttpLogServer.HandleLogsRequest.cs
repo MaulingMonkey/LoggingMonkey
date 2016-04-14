@@ -81,6 +81,7 @@ namespace LoggingMonkey {
 				writer.WriteLine("\t<title>{0} -- {1} ({2} - {3})</title>", network, channel, from, to );
 				writer.WriteLine("\t<meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\">");
 				writer.WriteLine("\t<script type=\"text/javascript\" src=\"http://cdn.jquerytools.org/1.2.7/jquery.tools.min.js\"></script>");
+				writer.WriteLine("\t<link rel=\"icon\" type=\"image/png\" href=\"/favicon.png\" />");
 				writer.WriteLine("\t<style type=\"text/css\">");
 				if ( tiny ) {
 					writer.WriteLine("\t	@font-face { font-family: \"04b03\"; src: url(\"/04B_03__.TTF\") format(\"truetype\"); }");

@@ -72,6 +72,7 @@
     <Compile Include="Config\AccessControl.cs" />
     <Compile Include="Config\AccessControlCommand.cs" />
     <Compile Include="IO\Http\HttpLogServer.HandleAuthRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer.HandleFaviconRequest.cs" />
     <Compile Include="IO\Http\HttpLogServer.HandleFontRequest.cs" />
     <Compile Include="IO\Http\HttpLogServer.HandleBackupRequest.cs" />
     <Compile Include="IO\Http\HttpLogServer.HandleInvalidPageRequest.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="IO\Http\HttpLogServer.HandleLogsRequest.cs" />
     <None Include="app.config" />
     <None Include="Resources\04B_03__.TTF" />
+    <None Include="Resources\favicon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
