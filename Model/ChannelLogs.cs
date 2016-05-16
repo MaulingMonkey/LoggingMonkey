@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace LoggingMonkey {
 	public static class ExtensionMethods {
@@ -72,21 +71,6 @@ namespace LoggingMonkey {
 
 			StreamWriter.WriteLine( line );
 			StreamWriter.Flush();
-
-			line = HttpUtility.HtmlEncode(line);
-			line = Regexps.LogWhen.Replace( line, m => "" );
-			var mWho = Regexps.LogWho.Match( line );
-			Debug.Assert( mWho.Success );
-			string nick, nih;
-			if ( mWho.Success ) {
-				nick = mWho.Groups["nick"].Value;
-				nih = mWho.Value;
-			} else {
-				nick = nih = string.Empty;
-			}
-
-			var preamble = string.Intern(line.Substring(0,mWho.Index));
-			var message  = line.Substring(mWho.Index+mWho.Length);
 		}
 	}
 }
