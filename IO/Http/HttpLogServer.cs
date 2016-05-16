@@ -1,21 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
 namespace LoggingMonkey {
 	partial class HttpLogServer {
-		public class HandlerArgs {
-			public HttpListenerContext	HttpListenerContext;
-			public AccessControlStatus	AccessControlStatus;
-			public AllLogs				Logs;
-		}
-
 		readonly HttpListener Listener;
-		readonly Dictionary< string, Action< HandlerArgs > > Handlers;
+		readonly Dictionary< string, Action< HttpRequest > > Handlers;
 
 		public HttpLogServer() {
 			Handlers = CreateDefaultHandlers( );
@@ -34,9 +26,9 @@ namespace LoggingMonkey {
 			}
 		}
 		
-		Dictionary< string, Action< HandlerArgs > > CreateDefaultHandlers( )
+		Dictionary< string, Action< HttpRequest > > CreateDefaultHandlers( )
 		{
-			return new Dictionary<string,Action<HandlerArgs>>( )
+			return new Dictionary<string,Action<HttpRequest>>( )
 			{
 				{ "/"              , a => HandleLogsRequest			( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
 				{ "/auth"          , a => { HandleAuthRequest		( a.HttpListenerContext, ref a.AccessControlStatus ); HandleLogsRequest( a.HttpListenerContext, a.AccessControlStatus, a.Logs ); } },
@@ -91,7 +83,7 @@ namespace LoggingMonkey {
 			if( !Handlers.ContainsKey(path) )
 				path = "/404";
 
-			var args = new HandlerArgs( )
+			var args = new HttpRequest( )
 			{
 				HttpListenerContext	= context,
 				AccessControlStatus	= acs,
