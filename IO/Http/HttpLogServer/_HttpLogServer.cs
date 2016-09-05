@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 
 namespace LoggingMonkey {
 	partial class HttpLogServer {
 		readonly HttpListener Listener;
-		readonly Dictionary< string, Action< HttpRequest > > Handlers;
+		readonly HttpRoutesList Handlers;
 
 		public HttpLogServer() {
 			Handlers = CreateDefaultHandlers( );
@@ -26,19 +24,19 @@ namespace LoggingMonkey {
 			}
 		}
 		
-		Dictionary< string, Action< HttpRequest > > CreateDefaultHandlers( )
+		HttpRoutesList CreateDefaultHandlers( )
 		{
-			return new Dictionary<string,Action<HttpRequest>>( )
+			return new HttpRoutesList( )
 			{
-				{ "/"              , a => HandleLogsRequest			( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
-				{ "/auth"          , a => { HandleAuthRequest		( a.HttpListenerContext, ref a.AccessControlStatus ); HandleLogsRequest( a.HttpListenerContext, a.AccessControlStatus, a.Logs ); } },
-				{ "/backup.zip"    , a => HandleBackupRequest		( a.HttpListenerContext, a.AccessControlStatus ) },
-				{ "/api/1/logs"    , a => HandleJsonLogsRequest		( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
-				//{ "/v2"            , CreateHandleTemplatecFile("index")		},
-				{ "/404"           , CreateHandleTemplatecFile("_404")		},
-				{ "/robots.txt"    , CreateHandleStaticFile("robots")		},
-				{ "/04b_03__.ttf"  , CreateHandleStaticFile("_04B_03__")	},
-				{ "/favicon.png"   , CreateHandleStaticFile("favicon")		},
+				{ "/"				, AccessControlStatus.Blacklisted,	a => HandleLogsRequest			( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
+				{ "/auth"			, AccessControlStatus.Blacklisted,	a => { HandleAuthRequest		( a.HttpListenerContext, ref a.AccessControlStatus ); HandleLogsRequest( a.HttpListenerContext, a.AccessControlStatus, a.Logs ); } },
+				{ "/backup.zip"		, AccessControlStatus.Admin,		a => HandleBackupRequest		( a.HttpListenerContext, a.AccessControlStatus ) },
+				{ "/api/1/logs"		, AccessControlStatus.Admin,		a => HandleJsonLogsRequest		( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
+				//{ "/v2"			  AccessControlStatus.Admin,		, CreateHandleTemplatecFile("index")	},
+				{ "/404"			, AccessControlStatus.Blacklisted,	CreateHandleTemplatecFile("_404")		},
+				{ "/robots.txt"		, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("robots")		},
+				{ "/04b_03__.ttf"	, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("_04B_03__")		},
+				{ "/favicon.png"	, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("favicon")		},
 			};
 		}
 
@@ -66,8 +64,6 @@ namespace LoggingMonkey {
 			}
 		}
 
-		static readonly Regex reAuthQuery = new Regex( @"^\?token=(?<token>.*)$", RegexOptions.Compiled );
-
 		void OnGetContext( IAsyncResult result )
 		{
 			if ( !Listener.IsListening ) return;
@@ -79,11 +75,6 @@ namespace LoggingMonkey {
 
 			AllLogs logs;
 			lock( Listener ) logs = _Logs;
-			
-			// Handle special cases:
-			var path = context.Request.Url.AbsolutePath.ToLowerInvariant();
-			if( !Handlers.ContainsKey(path) )
-				path = "/404";
 
 			var args = new HttpRequest( )
 			{
@@ -93,7 +84,7 @@ namespace LoggingMonkey {
 			};
 
 			try {
-				Handlers[ path ]( args );
+				Handlers.Dispatch( context.Request.Url.AbsolutePath.ToLowerInvariant(), args );
 #if !DEBUG
 			} catch ( Exception e ) {
 				if ( Platform.IsOnUnix ) {

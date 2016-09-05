@@ -79,6 +79,7 @@
     <Compile Include="IO\Http\HttpLogServer\HandleInvalidPageRequest.cs" />
     <Compile Include="IO\Http\HttpLogServer\Api\HandleJsonLogsRequest.cs" />
     <Compile Include="IO\Http\HttpRequest.cs" />
+    <Compile Include="IO\Http\HttpRoutesList.cs" />
     <Compile Include="IO\Http\LogRequestParameters.cs" />
     <Compile Include="Miscellanious\Debug.cs" />
     <Compile Include="Miscellanious\Json.cs" />
