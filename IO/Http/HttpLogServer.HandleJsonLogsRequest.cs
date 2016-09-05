@@ -3,68 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 
 namespace LoggingMonkey {
 	partial class HttpLogServer {
 		private void HandleJsonLogsRequest( HttpListenerContext context, AccessControlStatus acs, AllLogs logs )
 		{
-			var vars = context.Request.QueryString;
-			DateTime from, to;
-			int linesOfContext;
-			if (!DateTime.TryParse(vars["from"]   ??"",out from     )) from    = DateTime.Now.AddMinutes(-15);
-			if (!DateTime.TryParse(vars["to"]     ??"",out to       )) to      = DateTime.Now.AddMinutes(+15);
-			if (!int     .TryParse(vars["context"]??"",out linesOfContext)) linesOfContext = 0;
-			if ( linesOfContext <     0 ) linesOfContext = 0;
-			if ( linesOfContext > 10000 ) linesOfContext = 10000;
-
-			string network    = vars["server" ]   ?? "irc.afternet.org";
-			string channel    = vars["channel"]   ?? "#gamedev";
-			string nickquerys = vars["nickquery"] ?? null;
-			string userquerys = vars["userquery"] ?? null;
-			string hostquerys = vars["hostquery"] ?? null;
-			string querys     = vars["query"]     ?? null;
-			string querytype  = vars["querytype"] ?? "plaintext";
-			string timefmt    = vars["timefmt"]   ?? "pst";
-
-			Func<string,bool> bools = s => new[]{"true","1"}.Contains((vars[s]??"").ToLowerInvariant());
-			bool casesensitive = bools("casesensitive");
-			bool cats          = bools("cats");
-			bool tiny          = bools("tiny");
-
-			var options
-				= RegexOptions.Compiled
-				| (casesensitive?RegexOptions.None:RegexOptions.IgnoreCase)
-				;
-
-			Func<string,Regex> query_to_regex = input => {
-				if ( string.IsNullOrEmpty(input) ) return null;
-				switch ( querytype ) {
-				case "regex":     return new Regex(input,options);
-				case "wildcard":  return new Regex("^"+Regex.Escape(input).Replace(@"\*","(.*)").Replace(@"\?",".")+"$",options);
-				case "plaintext": return new Regex(Regex.Escape(input),options);
-				default: goto case "plaintext";
-				}
-			};
-
-			Regex nickquery = query_to_regex(nickquerys);
-			Regex userquery = query_to_regex(userquerys);
-			Regex hostquery = query_to_regex(hostquerys);
-			Regex query     = query_to_regex(querys    );
-
-			if ( !string.IsNullOrEmpty(nickquerys) && string.IsNullOrEmpty(userquerys) && string.IsNullOrEmpty(hostquerys) )
-			{
-				Match nuh = Regexps.IrcWhoMask.Match(nickquerys);
-				if ( nuh.Success )
-				{
-					var oldqt = querytype;
-					querytype = "wildcard";
-					nickquery = query_to_regex( nuh.Groups["nick"].Value );
-					userquery = query_to_regex( nuh.Groups["user"].Value );
-					hostquery = query_to_regex( nuh.Groups["host"].Value );
-					querytype = oldqt;
-				}
-			}
+			var p = new LogRequestParameters(context.Request);
 
 			using ( var writer = new StreamWriter(context.Response.OutputStream) ) {
 				var notices = new List<string>();
@@ -72,21 +16,21 @@ namespace LoggingMonkey {
 				writer.WriteLine(@"{");
 
 				ChannelLogs clog = null;
-				if ( logs==null ) {										notices.Add(string.Format("Logs are currently loading.  Reload this page in a minute."));
-				} else lock (logs) if ( !logs.ContainsKey(network) ) {	notices.Add(string.Format("Not serving logs for {0}", network));
-				} else if ( !logs[network].HasChannel(channel) ) {		notices.Add(string.Format("Not serving logs for {0}", channel));
+				if ( logs==null ) {											notices.Add(string.Format("Logs are currently loading.  Reload this page in a minute."));
+				} else lock (logs) if ( !logs.ContainsKey(p.Network) ) {	notices.Add(string.Format("Not serving logs for {0}", p.Network));
+				} else if ( !logs[p.Network].HasChannel(p.Channel) ) {		notices.Add(string.Format("Not serving logs for {0}", p.Channel));
 				} else {
-					writer.WriteLine(@"	""channels"": [{0}],", logs == null ? "" : string.Join(",",logs[network].Channels.Select(Json.ToString)));
-					clog = logs[network].Channel(channel);
+					writer.WriteLine(@"	""channels"": [{0}],", logs == null ? "" : string.Join(",",logs[p.Network].Channels.Select(Json.ToString)));
+					clog = logs[p.Network].Channel(p.Channel);
 					if ( clog.RequireAuth && !Allow(acs) )
 					{
 						switch( acs )
 						{
-						case AccessControlStatus.Admin:			notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  You're somehow simultaniously an admin yet not allowed in.", channel )); break;
-						case AccessControlStatus.Whitelisted:	notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  You're somehow simultaniously whitelisted yet not allowed in.", channel )); break;
-						case AccessControlStatus.Pending:		notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  Authorization cookie set, whitelisting pending.", channel )); break;
-						case AccessControlStatus.Error:			notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  PM LoggingMonkey !auth to set an authorization cookie.", channel )); break;
-						case AccessControlStatus.Blacklisted:	notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  Authorization cookie set, whitelisting pending...", channel )); break;
+						case AccessControlStatus.Admin:			notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  You're somehow simultaniously an admin yet not allowed in.",		p.Channel )); break;
+						case AccessControlStatus.Whitelisted:	notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  You're somehow simultaniously whitelisted yet not allowed in.",	p.Channel )); break;
+						case AccessControlStatus.Pending:		notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  Authorization cookie set, whitelisting pending.",					p.Channel )); break;
+						case AccessControlStatus.Error:			notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  PM LoggingMonkey !auth to set an authorization cookie.",			p.Channel )); break;
+						case AccessControlStatus.Blacklisted:	notices.Add(string.Format("Not (yet) authorized to access channel logs for {0}.  Authorization cookie set, whitelisting pending...",				p.Channel )); break;
 						}
 						clog = null;
 					}
@@ -118,7 +62,7 @@ namespace LoggingMonkey {
 						if (AccessControl.InTwitlist( line.NUH )) tags.Add("twit");
 
 						var whenS = "";
-						switch( timefmt )
+						switch( p.TimeFmt )
 						{
 						case "longpst": whenS = line.When.ToString("M/d/yy hh:mm:ss tt",Program.Culture); break;
 						case "longutc": whenS = TimeZoneInfo.ConvertTimeToUtc( line.When, pst ).ToString("M/d/yy HH:mm:ss",Program.Culture); break;
@@ -141,15 +85,15 @@ namespace LoggingMonkey {
 					int moreContext = -1;
 					Queue<FastLogReader.Line> PreContext = new Queue<FastLogReader.Line>();
 
-					bool highlight_matches = (nickquery!=null || hostquery!=null || query!=null) && linesOfContext>0;
+					bool highlight_matches = (p.NickQuery!=null || p.HostQuery!=null || p.MessQuery!=null) && p.LinesOfContext>0;
 
-					foreach ( var line in FastLogReader.ReadAllLines(network,channel,from,to) ) {
+					foreach ( var line in FastLogReader.ReadAllLines(p.Network,p.Channel,p.From,p.To) ) {
 						bool lineMatch
-							=  ( from <= line.When && line.When <= to )
-							&& ( nickquery == null || nickquery.IsMatch(line.Nick   ??"") )
-							&& ( userquery == null || userquery.IsMatch(line.User   ??"") )
-							&& ( hostquery == null || hostquery.IsMatch(line.Host   ??"") )
-							&& ( query     == null || query    .IsMatch(line.Message??"") )
+							=  ( p.From <= line.When && line.When <= p.To )
+							&& ( p.NickQuery == null || p.NickQuery.IsMatch(line.Nick   ??"") )
+							&& ( p.UserQuery == null || p.UserQuery.IsMatch(line.User   ??"") )
+							&& ( p.HostQuery == null || p.HostQuery.IsMatch(line.Host   ??"") )
+							&& ( p.MessQuery == null || p.MessQuery.IsMatch(line.Message??"") )
 							;
 
 						++linesSearched;
@@ -157,7 +101,7 @@ namespace LoggingMonkey {
 							++linesMatched;
 							// write out pre-context and write line
 							var nextLineTags = new List<string>();
-							if ( linesOfContext!=0 && PreContext.Count>=linesOfContext && moreContext==-1 ) {
+							if ( p.LinesOfContext!=0 && PreContext.Count>=p.LinesOfContext && moreContext==-1 ) {
 								nextLineTags.Add("break");
 							}
 
@@ -168,16 +112,16 @@ namespace LoggingMonkey {
 							nextLineTags.Add("matched");
 							write(line, nextLineTags);
 							nextLineTags.Clear();
-							moreContext = linesOfContext;
+							moreContext = p.LinesOfContext;
 						} else if ( moreContext>0 ) { // not a match, but it's post-context
 							write(line, new List<string>());
 							--moreContext;
 						} else { // not a match, not immediate post-context, start feeding back into pre-context
-							if ( linesOfContext!=0 && PreContext.Count>=linesOfContext ) {
+							if ( p.LinesOfContext!=0 && PreContext.Count>=p.LinesOfContext ) {
 								PreContext.Dequeue();
 								moreContext = -1;
 							}
-							if ( linesOfContext!=0 ) PreContext.Enqueue(line);
+							if ( p.LinesOfContext!=0 ) PreContext.Enqueue(line);
 						}
 					}
 					var stop2 = DateTime.Now;

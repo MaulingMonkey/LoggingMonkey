@@ -80,6 +80,7 @@
     <Compile Include="IO\Http\HttpLogServer.HandleJsonLogsRequest.cs" />
     <Compile Include="IO\Http\HttpLogServer.HandleRobotsRequest.cs" />
     <Compile Include="IO\Http\HttpRequest.cs" />
+    <Compile Include="IO\Http\LogRequestParameters.cs" />
     <Compile Include="Miscellanious\Debug.cs" />
     <Compile Include="Miscellanious\Json.cs" />
     <Compile Include="Model\AllLogs.cs" />
