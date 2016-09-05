@@ -230,13 +230,13 @@
 					var src = {};
 					var statIds = Object.keys(req.response.stats);
 					statIds.forEach(stat => src["stats."+stat] = req.response.stats[stat]);
-					statIds = statIds.map(stat => "stats."+stat);
+					statIds = Object.keys(src);
 
 					var stats = document.querySelectorAll("[data-match-stats]");
 					for (var i=0; i<stats.length; ++i) {
 						var stat = stats.item(i);
 						var statId = stat.getAttribute("data-match-stats");
-						if (statIds.indexOf(statId) !== -1) stat.textContent = src[stat];
+						if (statIds.indexOf(statId) !== -1) stat.textContent = src[statId];
 					}
 				}
 			};
