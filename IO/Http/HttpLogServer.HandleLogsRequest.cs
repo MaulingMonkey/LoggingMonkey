@@ -53,7 +53,7 @@ namespace LoggingMonkey {
 									}
 									clog = null;
 								}
-								else
+								else if (acs == AccessControlStatus.Error)
 								{
 									writer.WriteLine("<div class=\"notice\">NOTICE: LoggingMonkey will soon switch to a whitelist.  You don't currently have an authorization cookie set -- please PM LoggingMonkey !auth for a biodegradable and reusable authorization link.  #gamedev ban-ees need not apply.</div>");
 								}
@@ -127,16 +127,8 @@ namespace LoggingMonkey {
 							bool highlight_matches = (p.NickQuery!=null || p.HostQuery!=null || p.MessQuery!=null) && p.LinesOfContext>0;
 
 							foreach ( var line in FastLogReader.ReadAllLines(p.Network,p.Channel,p.From,p.To) ) {
-								bool lineMatch
-									=  ( p.From <= line.When && line.When <= p.To )
-									&& ( p.NickQuery == null || p.NickQuery.IsMatch(line.Nick   ??"") )
-									&& ( p.UserQuery == null || p.UserQuery.IsMatch(line.User   ??"") )
-									&& ( p.HostQuery == null || p.HostQuery.IsMatch(line.Host   ??"") )
-									&& ( p.MessQuery == null || p.MessQuery.IsMatch(line.Message??"") )
-									;
-
 								++linesSearched;
-								if ( lineMatch ) {
+								if ( p.IsMatch(line) ) {
 									++linesMatched;
 									// write out pre-context and write line
 									if ( p.LinesOfContext!=0 && PreContext.Count>=p.LinesOfContext && moreContext==-1 ) {

@@ -79,5 +79,14 @@ namespace LoggingMonkey {
 				}
 			}
 		}
+
+		public bool IsMatch(FastLogReader.Line line)
+		{
+			return ( From <= line.When && line.When <= To )
+				&& ( NickQuery == null || NickQuery.IsMatch(line.Nick   ??"") )
+				&& ( UserQuery == null || UserQuery.IsMatch(line.User   ??"") )
+				&& ( HostQuery == null || HostQuery.IsMatch(line.Host   ??"") )
+				&& ( MessQuery == null || MessQuery.IsMatch(line.Message??"") );
+		}
 	}
 }
