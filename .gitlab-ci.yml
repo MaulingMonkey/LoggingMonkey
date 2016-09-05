@@ -1,0 +1,33 @@
+stages:
+  - build
+  - deploy
+
+
+
+.build_vs2015_anycpu: &build_vs2015_anycpu
+  stage:  build
+  tags:   ["vs2015"]
+  script: ["powershell -ExecutionPolicy bypass -File \"_Build\\Build.ps1\""]
+  artifacts:
+    paths:
+      - bin/%CONFIG%
+
+
+
+"Build Debug|Any CPU":
+  <<: *build_vs2015_anycpu
+  variables:    { CONFIG: "Debug", PLATFORM: "Any CPU" }
+
+"Build Release|Any CPU":
+  <<: *build_vs2015_anycpu
+  variables:    { CONFIG: "Release", PLATFORM: "Any CPU" }
+
+
+
+"Redeploy LoggingMonkey":
+  stage:        deploy
+  tags:         ["logs.pandamojo.com"]
+  dependencies: ["Build Release|Any CPU"]
+  variables:    { CONFIG: "Release", PLATFORM: "Any CPU" }
+  script:       ["powershell -ExecutionPolicy bypass -File \"_Build\\Redeploy.ps1\""]
+  environment:  "test_maulingmonkey_com"
