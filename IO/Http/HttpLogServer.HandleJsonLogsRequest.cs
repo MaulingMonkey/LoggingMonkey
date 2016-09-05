@@ -41,7 +41,8 @@ namespace LoggingMonkey {
 				}
 
 				writer.WriteLine(@"	""notices"": [{0}],", string.Join(",",notices.Select(Json.ToString)));
-				if( acs == AccessControlStatus.Admin ) writer.WriteLine(@"	""access"": ""admin"",");
+				if( acs == AccessControlStatus.Admin )	writer.WriteLine(@"	""access"": ""admin"",");
+				else									writer.WriteLine(@"	""access"": ""none"",");
 
 				var pst = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
 				if( clog==null )

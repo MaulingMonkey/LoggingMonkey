@@ -26,7 +26,7 @@
 		Contact: MaulingMonkey in #gamedev [<a href="irc://irc.afternet.org/gamedev">irc://</a>][<a href="http://mibbit.com/?channel=%23gamedev&server=irc.afternet.org">Mibbit</a>]<br>
 		Timestamps are in PST/PDT<br>
 	</div>
-	<form method="get" action="#">
+	<form id="searchparams" method="get" action="#">
 	<!--<form id="searchparams" onsubmit="search(); return false">-->
 		<table><tr>
 			<td><table>
@@ -201,20 +201,29 @@
 
 			if (searchRequest) try { searchRequest.abort(); } catch (e) {}
 			searchRequest = new XMLHttpRequest();
-			searchRequest.responseType = "json";
+			searchRequest.responseType = "text";
 			searchRequest.open("GET", "/api/1/logs?"+query, true);
 			console.log(searchRequest, query);
 			searchRequest.onload = function() {
 				var req = searchRequest;
 				searchRequest = undefined;
 
-				if (!req.response) return; // TODO: Error display
+				var json = JSON.parse(req.response);
+				if (!json) return; // TODO: Error display
+
+				if (json.access === "admin") {
+					var toShow = document.querySelectorAll("[data-display-if='admin']");
+					for (var i=0; i<toShow.length; ++i) {
+						var item = toShow.item(i);
+						item.style.display = "";
+					}
+				}
 
 				// Update channels list
-				if (req.response.channels) {
+				if (json.channels) {
 					var channelSelector = document.querySelector("select[name='channel']");
 					for (var toRemove = channelSelector.lastChild; toRemove; toRemove = channelSelector.lastChild) toRemove.remove();
-					req.response.channels.forEach(function (channel,i) {
+					json.channels.forEach(function (channel,i) {
 						var e = document.createElement("option");
 						e.textContent = channel;
 						if (i === 0) e.setAttribute("checked", "");
@@ -222,14 +231,14 @@
 					});
 				}
 
-				syncLines(req.response.notices, "#notices", appendNotice);
-				syncLines(req.response.chat, "#chat-logs", appendChatLine);
+				syncLines(json.notices, "#notices", appendNotice);
+				syncLines(json.chat, "#chat-logs", appendChatLine);
 
 				// Update stats
-				if (req.response.stats) {
+				if (json.stats) {
 					var src = {};
-					var statIds = Object.keys(req.response.stats);
-					statIds.forEach(stat => src["stats."+stat] = req.response.stats[stat]);
+					var statIds = Object.keys(json.stats);
+					statIds.forEach(stat => src["stats."+stat] = json.stats[stat]);
 					statIds = Object.keys(src);
 
 					var stats = document.querySelectorAll("[data-match-stats]");
