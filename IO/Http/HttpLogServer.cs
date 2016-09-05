@@ -34,7 +34,7 @@ namespace LoggingMonkey {
 				{ "/auth"          , a => { HandleAuthRequest		( a.HttpListenerContext, ref a.AccessControlStatus ); HandleLogsRequest( a.HttpListenerContext, a.AccessControlStatus, a.Logs ); } },
 				{ "/backup.zip"    , a => HandleBackupRequest		( a.HttpListenerContext, a.AccessControlStatus ) },
 				{ "/api/1/logs"    , a => HandleJsonLogsRequest		( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
-				{ "/v2"            , CreateHandleTemplatecFile("index")		},
+				//{ "/v2"            , CreateHandleTemplatecFile("index")		},
 				{ "/404"           , CreateHandleTemplatecFile("_404")		},
 				{ "/robots.txt"    , CreateHandleStaticFile("robots")		},
 				{ "/04b_03__.ttf"  , CreateHandleStaticFile("_04B_03__")	},
