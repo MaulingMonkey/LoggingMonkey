@@ -72,13 +72,12 @@
     <Compile Include="Config\AccessControl.cs" />
     <Compile Include="Config\AccessControlCommand.cs" />
     <Compile Include="ExtensionMethods\System.Resources.ResourceManager.cs" />
-    <Compile Include="IO\Http\HttpLogServer.CreateHandleStaticFile.cs" />
-    <Compile Include="IO\Http\HttpLogServer.CreateHandleTemplateFile.cs" />
-    <Compile Include="IO\Http\HttpLogServer.HandleAuthRequest.cs" />
-    <Compile Include="IO\Http\HttpLogServer.HandleBackupRequest.cs" />
-    <Compile Include="IO\Http\HttpLogServer.HandleInvalidPageRequest.cs" />
-    <Compile Include="IO\Http\HttpLogServer.HandleJsonLogsRequest.cs" />
-    <Compile Include="IO\Http\HttpLogServer.HandleRobotsRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer\CreateHandleStaticFile.cs" />
+    <Compile Include="IO\Http\HttpLogServer\CreateHandleTemplateFile.cs" />
+    <Compile Include="IO\Http\HttpLogServer\HandleAuthRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer\HandleBackupRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer\HandleInvalidPageRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer\Api\HandleJsonLogsRequest.cs" />
     <Compile Include="IO\Http\HttpRequest.cs" />
     <Compile Include="IO\Http\LogRequestParameters.cs" />
     <Compile Include="Miscellanious\Debug.cs" />
@@ -97,7 +96,7 @@
     <Compile Include="IO\Net\DnsCache.cs" />
     <Compile Include="IO\File\FastLogReader.cs" />
     <Compile Include="IO\File\FileLineList.cs" />
-    <Compile Include="IO\Http\HttpLogServer.cs" />
+    <Compile Include="IO\Http\HttpLogServer\_HttpLogServer.cs" />
     <Compile Include="Reactors\IIrcMessageReactor.cs" />
     <Compile Include="Reactors\IrcMessageRegexReactor.cs" />
     <Compile Include="Reactors\IrcMessageLoggerReactor.cs" />
@@ -121,7 +120,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IO\Http\HttpLogServer.HandleLogsRequest.cs" />
+    <Compile Include="IO\Http\HttpLogServer\HandleLogsRequest.cs" />
     <None Include="app.config" />
     <None Include="Resources\04B_03__.TTF" />
     <None Include="Resources\favicon.png" />
