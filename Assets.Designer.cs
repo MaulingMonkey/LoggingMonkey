@@ -71,12 +71,56 @@ namespace LoggingMonkey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;html&gt;&lt;head&gt;
+        ///	&lt;title&gt;No such page&lt;/title&gt;
+        ///&lt;/head&gt;&lt;body&gt;
+        ///	No such page {{Request.Url.AbsoluteUri}}&lt;br&gt;
+        ///	Try &lt;a href=&quot;/&quot;&gt;{{Request.Url.Host}}&lt;/a&gt; instead you silly git&lt;br&gt;
+        ///&lt;/body&gt;&lt;/html&gt;
+        ///.
+        /// </summary>
+        internal static string _404 {
+            get {
+                return ResourceManager.GetString("_404", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] favicon {
             get {
                 object obj = ResourceManager.GetObject("favicon", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;html&gt;&lt;head&gt;
+        ///	&lt;title&gt;{{Network}} &amp;mdash; {{Channel}} ({{FromDate}} - {{ToDate}})&lt;/title&gt;
+        ///	&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html;charset=UTF-8&quot;&gt;
+        ///	&lt;script type=&quot;text/javascript&quot; src=&quot;http://cdn.jquerytools.org/1.2.7/jquery.tools.min.js&quot;&gt;&lt;/script&gt;
+        ///	&lt;link rel=&quot;icon&quot; type=&quot;image/png&quot; href=&quot;/favicon.png&quot; /&gt;
+        ///	&lt;style type=&quot;text/css&quot;&gt;
+        ///		/*	if ( tiny ) {
+        ///			@font-face	{ font-family: &quot;04b03&quot;; src: url(&quot;/04B_03__.TTF&quot;) format(&quot;truetype&quot;); }
+        ///			*			{ font-family: &quot;04b03&quot;; font-size: 8px; }
+        ///		}*/
+        ///	 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string index {
+            get {
+                return ResourceManager.GetString("index", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User-agent: *
+        ///Disallow: /.
+        /// </summary>
+        internal static string robots {
+            get {
+                return ResourceManager.GetString("robots", resourceCulture);
             }
         }
     }

@@ -1,0 +1,253 @@
+﻿<html><head>
+	<title>{{Network}} &mdash; {{Channel}} ({{FromDate}} - {{ToDate}})</title>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="http://cdn.jquerytools.org/1.2.7/jquery.tools.min.js"></script>
+	<link rel="icon" type="image/png" href="/favicon.png" />
+	<style type="text/css">
+		/*	if ( tiny ) {
+			@font-face	{ font-family: "04b03"; src: url("/04B_03__.TTF") format("truetype"); }
+			*			{ font-family: "04b03"; font-size: 8px; }
+		}*/
+		/*	if ( DEBUG ) {
+			table, tr, td { cell-spacing: 0; padding: 0; margin: 0; border: 1px solid black; border-collapse: collapse; vertical-align: top; }
+		}*/
+		table, tr, td { cell-spacing: 0; padding: 0; margin: 0; border-collapse: collapse; vertical-align: top; }
+		a        { color: blue; }
+		a.twit   { color: orange; }
+		a.tor    { color: red; }
+		.link    { color: red; }
+		.tooltip { display: none; background: black; color: white; padding: 5px; }
+		.matched { background-color: #B0FFB0; }
+		.notice  { color: white; font-weight: bold; background: #AE0E20; }
+	</style>
+</head><body>
+	<div style="float: right; text-align: right">
+		Contact: MaulingMonkey in #gamedev [<a href="irc://irc.afternet.org/gamedev">irc://</a>][<a href="http://mibbit.com/?channel=%23gamedev&server=irc.afternet.org">Mibbit</a>]<br>
+		Timestamps are in PST/PDT<br>
+	</div>
+	<form method="get" action="#">
+	<!--<form id="searchparams" onsubmit="search(); return false">-->
+		<table><tr>
+			<td><table>
+				<tr><td><label>Network:</label></td><td><input name="server"  value="irc.afternet.org"></td></tr>
+
+
+				<!-- TODO: Re-work dropdown to be based on JSON replies? -->
+				<tr><td><label>Channel:</label></td><td><select name="channel">
+					<option>#gamedev</option>
+					<option>#graphicsdev</option>
+					<option>#graphicschat</option>
+					<option>#anime</option>
+					<option>#starcraft</option>
+				</select></td></tr>
+
+
+				<tr><td></td><td>Search Parameters</td></tr>
+				<tr><td><label>Nickname:</label></td><td><input name="nickquery"   value=""></td><td>(or wildcard mask)</td></tr>
+				<tr><td><label>Username:</label></td><td><input name="userquery"   value=""></td><td></td></tr>
+				<tr><td><label>Hostname:</label></td><td><input name="hostquery"   value=""></td><td></td></tr>
+				<tr><td><label>Message:</label></td> <td><input name="query"       value=""></td><td></td></tr>
+				<tr><td></td><td>
+					    <input name="casesensitive" value="true"      type="checkbox"        > <label>Case Sensitive</label>
+					<br><input name="querytype"     value="plaintext" type="radio"    checked> <label>Plain Text</label>
+					<br><input name="querytype"     value="wildcard"  type="radio"           > <label>Wildcard Match</label>
+					<br><input name="querytype"     value="regex"     type="radio"           > <label>Regex Match</label>
+				</td><td></td></tr>
+			</table></td><td><table>
+				<tr><td><label>From:   </label></td><td><input name="from"    value="{{FromDate}}"> (12h PST)</td></tr>
+				<tr><td><label>To:     </label></td><td><input name="to"      value="{{ToDate}}"> (12h PST)</td></tr>
+				<tr><td><label>Context:</label></td><td><input name="context" value="0"> (12h PST)</td></tr>
+				<tr><td>                       </td><td>Display Format:</td></tr>
+				<tr><td colspan="2"><input name="timefmt" type="radio" value="pst"     checked> <label>M/D H:MM [AM,PM] (PST)</label></td></tr>
+				<tr><td colspan="2"><input name="timefmt" type="radio" value="longpst"        > <label>M/D/YY H:MM:SS [AM,PM] (PST)</label></td></tr>
+				<tr><td colspan="2"><input name="timefmt" type="radio" value="longutc"        > <label>M/D/YY H:MM:SS (24h) (UTC)</label></td></tr>
+				<tr><td>                       </td><td><input type="submit"  value="Search"></td></tr>
+			</table></td>
+		</tr></table>
+	</form>
+
+	<div id="notices">
+		<!-- {{Notices}} -->
+	</div>
+	<div style="display: none" class="notice">Logs are currently loading.  Reload this page in a minute.</div>
+	<div style="display: none" class="notice">Not serving logs for {{Network}}</div>
+	<div style="display: none" class="notice">Not serving logs for {{Channel}}</div>
+	<div style="display: none" class="notice">Not (yet) authorized to access channel logs for {{Channel}}.  You're somehow simultaniously an admin yet not allowed in.</div>
+	<div style="display: none" class="notice">Not (yet) authorized to access channel logs for {{Channel}}.  You're somehow simultaniously whitelisted yet not allowed in.</div>
+	<div style="display: none" class="notice">Not (yet) authorized to access channel logs for {{Channel}}.  Authorization cookie set, whitelisting pending.</div>
+	<div style="display: none" class="notice">Not (yet) authorized to access channel logs for {{Channel}}.  PM LoggingMonkey !auth to set an authorization cookie.</div>
+	<div style="display: none" class="notice">Not (yet) authorized to access channel logs for {{Channel}}.  Authorization cookie set, whitelisting pending...</div>
+	<hr  style="display: none">
+	<div style="display: none" class="notice">NOTICE: LoggingMonkey will soon switch to a whitelist.  You don't currently have an authorization cookie set -- please PM LoggingMonkey !auth for a biodegradable and reusable authorization link.  #gamedev ban-ees need not apply.</div>
+
+	<hr  data-display-if="admin" style="display: none">
+	<div data-display-if="admin" style="display: none; background: lightgreen;">
+	Hello admin!  You now have access to the following channel commands:
+		!whitelist nick!user@host
+		!blacklist nick!user@host
+		!twit[list] nick!user@host
+		!untwit[list] nick!user@host
+	</div>
+
+	<div id="chat-logs">
+		<!-- {{ChatLogs}} -->
+	</div>
+
+	<!--<hr>
+	Search matched <span data-match-stats="stats.matched">0</span> lines, displayed <span data-match-stats="stats.displayed">0</span>, searched <span data-match-stats="stats.searched">0</span>, and took <span data-match-stats="stats.time">0</span> seconds-->
+
+	<script type='text/javascript'> $(document).ready(function() { $('a[title]').tooltip(); });</script>
+
+	<script>
+		(function(){
+			var params = new URLSearchParams(location.search.slice(1));
+
+
+
+			var channelsList = document.querySelectorAll("select[name='channel'] > option");
+			for (var i=0; i<channelsList.length; ++i) {
+				var channelOption = channelsList.item(i);
+				var channelId = channelOption.textContent;
+				if (channelId === params.get('channel'))	channelOption.setAttribute("selected", "");
+				else										channelOption.removeAttribute("selected");
+			}
+
+			if (params.get("cats")) {
+				var preserveCats = document.createElement("input");
+				preserveCats.setAttribute("type", "hidden");
+				preserveCats.setAttribute("value", "true");
+				preserveCats.setAttribute("name", "cats");
+				document.querySelector("form[action='.']").appendChild(preserveCats);
+			}
+
+			// Text fields
+			"server nickquery userquery hostquery query from to context".split(' ').forEach(name => {
+				if (params.get(name)) document.querySelector("input[name='"+name+"']").setAttribute("value", params.get(name));
+			});
+
+			// Checkboxes, Radio boxes
+			"casesensitive querytype timefmt".split(' ').forEach(name => {
+				if (params.get(name)) {
+					var inputs = document.querySelectorAll("input[name='"+name+"']");
+					for (var i=0; i<inputs.length; ++i) {
+						var input = inputs.item(i);
+						var value = input.getAttribute("value");
+						if (params.get(name)===value)	input.setAttribute("checked", "");
+					}
+					for (var i=0; i<inputs.length; ++i) {
+						var input = inputs.item(i);
+						var value = input.getAttribute("value");
+						if (params.get(name)!==value)	input.removeAttribute("checked");
+					}
+				}
+			});
+		})();
+
+		function appendText(e, text) {
+			e.appendChild(document.createTextNode(text));
+		}
+
+		function appendNUH(e, line) {
+			var a = document.createElement("a");
+			a.title = line.nick+"!"+line.user+"@"+line.host;
+			a.textContent = line.nick;
+			$(a).tooltip();
+			e.appendChild(a);
+		}
+
+		function appendMessage(e, line) {
+			appendText(e, line.message); // TODO: Urlize, cats
+		}
+
+		function appendChatLine(chatLogs, line) {
+			var e = document.createElement("div");
+			e.setAttribute("checked", "");
+
+			// TODO: Add classes based on line.tags
+
+			switch (line.type) {
+			case "Action":	appendText(e, "["+line.when+"] *");		appendNUH(e, line);			appendText(e," ");	appendMessage(e, line); appendText("*"); break;
+			case "Message":	appendText(e, "["+line.when+"] <");		appendNUH(e, line);			appendText(e,"> ");	appendMessage(e, line); break;
+			case "Join":	appendText(e, "["+line.when+"] -->| ");	appendNUH(e, line);			appendText(e," ");	appendMessage(e, line); break;
+			case "Part":	appendText(e, "["+line.when+"] |<-- ");	appendNUH(e, line);			appendText(e," ");	appendMessage(e, line); break;
+			case "Quit":	appendText(e, "["+line.when+"] |<-- ");	appendNUH(e, line);			appendText(e," ");	appendMessage(e, line); break;
+			case "Kick":	appendText(e, "["+line.when+"] |<-- ");	appendText(e, line.nick);	appendText(e," ");	appendMessage(e, line); break;
+			case "Meta":	appendText(e, "["+line.when+"] +--+ ");	appendNUH(e, line);			appendText(e," ");	appendMessage(e, line); break;
+			default:		appendText(e, "["+line.when+"] ??? ");													appendMessage(e, line); break;
+			}
+
+			chatLogs.appendChild(e);
+		}
+
+		function appendNotice(notices, notice) {
+			var e = document.createElement("div");
+			e.textContent = notice;
+			e.classList.add("notice");
+			notices.appendChild(e);
+		}
+
+		function syncLines(input, target, append) {
+			if (input) {
+				var e = document.querySelector(target);
+				while (e.hasChildNodes()) e.lastChild.remove();
+				input.forEach(function (entry) { append(e, entry); });
+			}
+		}
+
+		var searchRequest = undefined;
+		function search() {
+			var query = $('#searchparams').serialize();
+
+			if (searchRequest) try { searchRequest.abort(); } catch (e) {}
+			searchRequest = new XMLHttpRequest();
+			searchRequest.responseType = "json";
+			searchRequest.open("GET", "/api/1/logs?"+query, true);
+			console.log(searchRequest, query);
+			searchRequest.onload = function() {
+				var req = searchRequest;
+				searchRequest = undefined;
+
+				if (!req.response) return; // TODO: Error display
+
+				// Update channels list
+				if (req.response.channels) {
+					var channelSelector = document.querySelector("select[name='channel']");
+					for (var toRemove = channelSelector.lastChild; toRemove; toRemove = channelSelector.lastChild) toRemove.remove();
+					req.response.channels.forEach(function (channel,i) {
+						var e = document.createElement("option");
+						e.textContent = channel;
+						if (i === 0) e.setAttribute("checked", "");
+						channelSelector.appendChild(e);
+					});
+				}
+
+				syncLines(req.response.notices, "#notices", appendNotice);
+				syncLines(req.response.chat, "#chat-logs", appendChatLine);
+
+				// Update stats
+				if (req.response.stats) {
+					var src = {};
+					var statIds = Object.keys(req.response.stats);
+					statIds.forEach(stat => src["stats."+stat] = req.response.stats[stat]);
+					statIds = statIds.map(stat => "stats."+stat);
+
+					var stats = document.querySelectorAll("[data-match-stats]");
+					for (var i=0; i<stats.length; ++i) {
+						var stat = stats.item(i);
+						var statId = stat.getAttribute("data-match-stats");
+						if (statIds.indexOf(statId) !== -1) stat.textContent = src[stat];
+					}
+				}
+			};
+			searchRequest.onerror = function(e) {
+				//console.log(e); // TODO: Error display
+			};
+			searchRequest.onabort = function(e) {
+				//console.log(e);
+			};
+			searchRequest.send();
+		}
+		//search();
+	</script>
+</body></html>

@@ -2,7 +2,7 @@
 using System.IO;
 
 namespace LoggingMonkey {
-	static class __Extension_Methods {
+	static partial class __Extension_Methods {
 		public static void CopyTo( this Stream src, Stream dest ) {
 			int size = (src.CanSeek) ? Math.Min((int)(src.Length - src.Position), 0x2000) : 0x2000;
 			byte[] buffer = new byte[size];

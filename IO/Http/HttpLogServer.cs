@@ -32,11 +32,13 @@ namespace LoggingMonkey {
 			{
 				{ "/"              , a => HandleLogsRequest			( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
 				{ "/auth"          , a => { HandleAuthRequest		( a.HttpListenerContext, ref a.AccessControlStatus ); HandleLogsRequest( a.HttpListenerContext, a.AccessControlStatus, a.Logs ); } },
-				{ "/robots.txt"    , a => HandleRobotsRequest		( a.HttpListenerContext ) },
-				{ "/04b_03__.ttf"  , a => HandleFontRequest			( a.HttpListenerContext ) },
-				{ "/favicon.png"   , a => HandleFaviconRequest		( a.HttpListenerContext ) },
 				{ "/backup.zip"    , a => HandleBackupRequest		( a.HttpListenerContext, a.AccessControlStatus ) },
-				{ "/404"           , a => HandleInvalidPageRequest	( a.HttpListenerContext ) },
+				{ "/api/1/logs"    , a => HandleJsonLogsRequest		( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
+				{ "/v2"            , CreateHandleTemplatecFile("index")		},
+				{ "/404"           , CreateHandleTemplatecFile("_404")		},
+				{ "/robots.txt"    , CreateHandleStaticFile("robots")		},
+				{ "/04b_03__.ttf"  , CreateHandleStaticFile("_04B_03__")	},
+				{ "/favicon.png"   , CreateHandleStaticFile("favicon")		},
 			};
 		}
 

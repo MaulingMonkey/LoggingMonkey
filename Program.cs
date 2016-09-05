@@ -9,7 +9,8 @@ namespace LoggingMonkey {
 	public static class Program {
 
 #if DEBUG
-		public static readonly string PrimaryPrefix = "http://logs2.pandamojo.com" + (Platform.IsOnUnix?":8080":"") + "/";
+		public static readonly string PrimaryPrefix = "http://logs.localhost/";
+		//public static readonly string PrimaryPrefix = "http://logs2.pandamojo.com" + (Platform.IsOnUnix?":8080":"") + "/";
 #else
 		public static readonly string PrimaryPrefix = "http://logs.pandamojo.com" + (Platform.IsOnUnix?":8080":"") + "/";
 #endif
@@ -56,7 +57,8 @@ namespace LoggingMonkey {
 			var logpattern = Paths.LogsDirectory+"{network}-{channel}-{year}-{month}-{day}.log";
 #if DEBUG
 			var channels = new[] { "#sparta" };
-			var whitelistChannels = new[] { "#sparta" };
+			//var whitelistChannels = new[] { "#sparta" };
+			var whitelistChannels = new string[0];
 #else
 			var channels = new[] { "#gamedev", "#graphicschat", "#graphicsdev", "#anime", "#starcraft" };
 			var whitelistChannels = new[] { "#gamedev" };

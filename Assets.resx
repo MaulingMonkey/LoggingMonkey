@@ -124,4 +124,13 @@
   <data name="_04B_03__" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\04B_03__.TTF;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="robots" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\robots.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="_404" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\404.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="index" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\index.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>

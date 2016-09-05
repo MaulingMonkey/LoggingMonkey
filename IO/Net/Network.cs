@@ -27,7 +27,7 @@ namespace LoggingMonkey {
 
 			Logs = logs[hostname];
 			_Channels = new HashSet<string>(channels);
-			Pinger = new Timer(o=>TrySend("PING LoggingMonkey"),null,0,60000);
+			//Pinger = new Timer(o=>TrySend("PING LoggingMonkey"),null,0,60000);
 		}
 
 		public void TrySend( string message ) {
@@ -49,6 +49,8 @@ namespace LoggingMonkey {
 
 		Exception LastException = null;
 		public void Work() {
+			return;
+
 			for (;;)
 			try
 			{
@@ -85,6 +87,8 @@ namespace LoggingMonkey {
 		}
 
 		void Reconnect( ) {
+			return;
+
 			Thread.Sleep( Backoff );
 			Backoff += TimeSpan.FromSeconds( 5 );
 			if( Backoff > MaxTimeout )
