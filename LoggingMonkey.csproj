@@ -72,6 +72,7 @@
     <Compile Include="Config\AccessControl.cs" />
     <Compile Include="Config\AccessControlCommand.cs" />
     <Compile Include="ExtensionMethods\System.Resources.ResourceManager.cs" />
+    <Compile Include="IO\Http\HttpLogServer\Api\HandleAccessControlListRequest.cs" />
     <Compile Include="IO\Http\HttpLogServer\CreateHandleStaticFile.cs" />
     <Compile Include="IO\Http\HttpLogServer\CreateHandleTemplateFile.cs" />
     <Compile Include="IO\Http\HttpLogServer\HandleAuthRequest.cs" />

@@ -1,9 +1,10 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace LoggingMonkey
 {
-	class FileAccessList
+	public class FileAccessList
 	{
 		static readonly RegexOptions RegexOptions = RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase;
 
@@ -19,6 +20,11 @@ namespace LoggingMonkey
 		{
 			Description = description;
 			FRLL = new FileTransformedLineList<Regex>( path, WildcardsToRegex );
+		}
+
+		public IEnumerable<string> Dump()
+		{
+			return FRLL.FileLineList.ToArray();
 		}
 
 		public void AppendLine( string line )

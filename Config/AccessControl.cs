@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -29,6 +30,15 @@ namespace LoggingMonkey
 		static readonly FileAccessList mPendinglist = new FileAccessList( "Pending List", Paths.PendingTxt   );
 		static readonly FileAccessList mWhitelist   = new FileAccessList( "Whitelist",    Paths.WhitelistTxt );
 		static readonly FileAccessList mTwitlist    = new FileAccessList( "Twit List",    Paths.TwitlistTxt  );
+
+		public static readonly Dictionary<string,FileAccessList> FileAccessLists = new Dictionary<string, FileAccessList>()
+		{
+			{ "adminlist",		mAdminlist	},
+			{ "blacklist",		mBlacklist	},
+			{ "pendinglist",	mPendinglist},
+			{ "whitelist",		mWhitelist	},
+			{ "twitlist",		mTwitlist	},
+		};
 
 		static readonly AccessControlCommand
 			accWhitelist  = new AccessControlCommand( "!whitelist"  ) { InvokerRequires = { mAdminlist }, TargetAddedTo = { mWhitelist }, TargetRemovedFrom = { mPendinglist, mBlacklist } },

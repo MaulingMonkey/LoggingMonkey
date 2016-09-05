@@ -80,6 +80,8 @@
 		!untwit[list] nick!user@host
 	</div>
 
+	<div id="pending-list" style="display: none; background: lightblue;"></div>
+
 	<div id="chat-logs">
 		<!-- {{ChatLogs}} -->
 	</div>
@@ -132,6 +134,27 @@
 					}
 				}
 			});
+
+			// Check pending list:
+			var pendingCheck = new XMLHttpRequest();
+			pendingCheck.responseType = "json";
+			pendingCheck.open("GET", "/api/1/acl/pendinglist", true);
+			pendingCheck.onload = function() {
+				if (!pendingCheck.response) return;
+
+				if (pendingCheck.response.lines && pendingCheck.response.lines.length > 0) {
+					var div = document.querySelector("#pending-list");
+					div.style.display = "";
+					div.appendChild(document.createTextNode("Pending requests:"));
+					div.appendChild(document.createElement("br"));
+					div.appendChild(document.createElement("br"));
+					pendingCheck.response.lines.forEach(line => {
+						div.appendChild(document.createTextNode(line));
+						div.appendChild(document.createElement("br"));
+					});
+				}
+			}
+			pendingCheck.send();
 		})();
 
 		function appendText(e, text) {

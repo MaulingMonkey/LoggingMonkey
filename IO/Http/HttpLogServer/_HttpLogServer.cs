@@ -26,17 +26,29 @@ namespace LoggingMonkey {
 		
 		HttpRoutesList CreateDefaultHandlers( )
 		{
+#if false// DEBUG
+			var AccessControlStatus_AclDisplay = AccessControlStatus.Blacklisted;
+#else
+			var AccessControlStatus_AclDisplay = AccessControlStatus.Admin;
+#endif
 			return new HttpRoutesList( )
 			{
-				{ "/"				, AccessControlStatus.Blacklisted,	a => HandleLogsRequest			( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
-				{ "/auth"			, AccessControlStatus.Blacklisted,	a => { HandleAuthRequest		( a.HttpListenerContext, ref a.AccessControlStatus ); HandleLogsRequest( a.HttpListenerContext, a.AccessControlStatus, a.Logs ); } },
-				{ "/backup.zip"		, AccessControlStatus.Admin,		a => HandleBackupRequest		( a.HttpListenerContext, a.AccessControlStatus ) },
-				{ "/api/1/logs"		, AccessControlStatus.Admin,		a => HandleJsonLogsRequest		( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
-				//{ "/v2"			  AccessControlStatus.Admin,		, CreateHandleTemplatecFile("index")	},
-				{ "/404"			, AccessControlStatus.Blacklisted,	CreateHandleTemplatecFile("_404")		},
-				{ "/robots.txt"		, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("robots")		},
-				{ "/04b_03__.ttf"	, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("_04B_03__")		},
-				{ "/favicon.png"	, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("favicon")		},
+				{ "/"						, AccessControlStatus.Blacklisted,	a => HandleLogsRequest			( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
+				{ "/auth"					, AccessControlStatus.Blacklisted,	a => { HandleAuthRequest		( a.HttpListenerContext, ref a.AccessControlStatus ); HandleLogsRequest( a.HttpListenerContext, a.AccessControlStatus, a.Logs ); } },
+				{ "/backup.zip"				, AccessControlStatus.Admin,		a => HandleBackupRequest		( a.HttpListenerContext, a.AccessControlStatus ) },
+				{ "/api/1/logs"				, AccessControlStatus.Admin,		a => HandleJsonLogsRequest		( a.HttpListenerContext, a.AccessControlStatus, a.Logs ) },
+
+				{ "/api/1/acl/adminlist"	, AccessControlStatus_AclDisplay,	CreateListAccessControl("adminlist")	},
+				{ "/api/1/acl/blacklist"	, AccessControlStatus_AclDisplay,	CreateListAccessControl("blacklist")	},
+				{ "/api/1/acl/pendinglist"	, AccessControlStatus_AclDisplay,	CreateListAccessControl("pendinglist")	},
+				{ "/api/1/acl/whitelist"	, AccessControlStatus_AclDisplay,	CreateListAccessControl("whitelist")	},
+				{ "/api/1/acl/twitlist"		, AccessControlStatus_AclDisplay,	CreateListAccessControl("twitlist")		},
+
+				//{ "/v2"					  AccessControlStatus.Admin,		, CreateHandleTemplatecFile("index")	},
+				{ "/404"					, AccessControlStatus.Blacklisted,	CreateHandleTemplatecFile("_404")		},
+				{ "/robots.txt"				, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("robots")		},
+				{ "/04b_03__.ttf"			, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("_04B_03__")		},
+				{ "/favicon.png"			, AccessControlStatus.Blacklisted,	CreateHandleStaticFile("favicon")		},
 			};
 		}
 
