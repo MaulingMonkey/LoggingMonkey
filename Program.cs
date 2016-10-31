@@ -39,7 +39,7 @@ namespace LoggingMonkey {
 		}
 
 		static void Main() {
-			Debug.LogReleaseExceptions( () => Work() );
+			Debug.LogExceptions( () => Work() );
 		}
 
 		static void Work() {
