@@ -59,8 +59,11 @@ namespace LoggingMonkey {
 		public static void Write( string what )
 		{
 			if (!string.IsNullOrWhiteSpace(what)) {
-				var e = new SentryEvent(new SentryMessage(what.Trim('\r','\n','\t',' '))) { Level = ErrorLevel.Info };
-				RavenClient.Capture(e);
+				var bc = new Breadcrumb("debug") {
+					Level	= BreadcrumbLevel.Info,
+					Message	= what.Trim("\r\n\t ".ToCharArray()),
+				};
+				RavenClient.AddTrail(bc);
 			}
 			DoWrite( what );
 		}
